@@ -11,28 +11,19 @@ namespace MissionControl.Host.Core.Tests.Unit
         public async Task Test1()
         {
             var handler = new TestCommandHandler();
-            var response = await handler.Handle(new CliCommand());
+            var response = await handler.Handle(new HelloWorldCommand());
 
-            var disposable = response.Observable.Subscribe(
+            /*var disposable = response.Observable.Subscribe(
                 next => { },
-                err => { });
-            
-            disposable.Dispose();
+                err => { });*/
         }
     }
     
-    public class TestCommandHandler : ICliCommandHandler<CliCommand, SagaResponse>
+    public class TestCommandHandler : ICliCommandHandler<HelloWorldCommand, TextResponse>
     {
-        public async Task<SagaResponse> Handle(CliCommand command)
+        public Task<TextResponse> Handle(HelloWorldCommand command)
         {
-            await Task.Delay(0);
-            
-            return new SagaResponse(Observable.Create<CliResponse>(observer =>
-            {
-                observer.OnNext(new TextResponse());
-                observer.OnCompleted();
-                return Task.CompletedTask;
-            }));
+            return Task.FromResult(new TextResponse($"hi {command.Name}"));
         }
     }
 }

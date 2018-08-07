@@ -2,15 +2,29 @@
 
 namespace MissionControl.Host.Core
 {
-    public /*abstract*/ class CliCommand
+    public abstract class CliCommand
     {
-        public CliCommand()
+        protected CliCommand()
         {
             Id = Guid.NewGuid(); 
         }
         
-        public string Input { get; set; }
-        
         public Guid Id { get; }
+    }
+
+    [CommandText("hello-world")]
+    public class HelloWorldCommand : CliCommand
+    {
+        public string Name { get; set; }
+    }
+
+    public class CommandTextAttribute : Attribute
+    {
+        public CommandTextAttribute(string commandText)
+        {
+            CommandText = commandText;
+        }
+        
+        public string CommandText { get; }
     }
 }

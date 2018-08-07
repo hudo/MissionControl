@@ -6,8 +6,6 @@ namespace MissionControl.Host.Core
         where T : CliCommand
         where R : CliResponse
     {
-        // https://www.interact-sw.co.uk/iangblog/2013/11/29/async-yield-return
-        
         Task<R> Handle(T command);
     }
 }
