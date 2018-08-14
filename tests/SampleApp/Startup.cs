@@ -49,8 +49,6 @@ namespace SampleApp
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
-
             app.UseMissingControl();
             
             app.UseStaticFiles();

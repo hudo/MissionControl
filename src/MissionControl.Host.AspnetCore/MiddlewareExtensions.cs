@@ -5,9 +5,13 @@ namespace MissionControl.Host.AspnetCore
 {
     public static class MiddlewareExtensions
     {
-        public static IApplicationBuilder UseMissingControl(this IApplicationBuilder builder)
+        public static IApplicationBuilder UseMissingControl(this IApplicationBuilder builder, Action<McOptions> configuration = null)
         {
-            return builder.UseMiddleware<MissionControlMiddleware>();
+            var options = new McOptions();
+
+            configuration?.Invoke(options);
+
+            return builder.UseMiddleware<MissionControlMiddleware>(options);
         }
     }
 }
