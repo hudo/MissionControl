@@ -3,6 +3,14 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Content\test.js" />
+    <None Remove="index.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Content\index.html" />
+    <EmbeddedResource Include="Content\test.js" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>

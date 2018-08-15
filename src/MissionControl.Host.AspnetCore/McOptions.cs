@@ -1,10 +1,14 @@
-﻿namespace MissionControl.Host.AspnetCore
+﻿using System;
+using Microsoft.AspNetCore.Http;
+
+namespace MissionControl.Host.AspnetCore
 {
     public class McOptions
     {
         public McOptions()
         {
-            Url = "mc";
+            Url = "/mc";
+            Authentication = req => false;
         }
         
         /// <summary>
@@ -12,5 +16,7 @@
         /// Default is 'mc/'
         /// </summary>
         public string Url { get; set; }
+
+        public Func<HttpRequest, bool> Authentication { get; set; }
     }
 }
