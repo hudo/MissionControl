@@ -14,10 +14,10 @@ namespace MissionControl.Host.AspnetCore.Routes
         private readonly Dictionary<string, string> _contentTypes = new Dictionary<string, string>
         {
             { ".js", "application/javascript" },
-            { ".css", "text/css"},
-            { ".png", "image/png"},
-            { ".jpg", "image/jpeg"},
-            { ".gif", "image/gif"},
+            { ".css", "text/css" },
+            { ".png", "image/png" },
+            { ".jpg", "image/jpeg" },
+            { ".gif", "image/gif" },
         };
 
         public StaticContentRoute(Assembly assembly) : base("")
