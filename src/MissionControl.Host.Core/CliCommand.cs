@@ -17,7 +17,7 @@ namespace MissionControl.Host.Core
     {
         public string Name { get; set; }
     }
-
+    
     public class CommandTextAttribute : Attribute
     {
         public CommandTextAttribute(string commandText)
@@ -27,4 +27,6 @@ namespace MissionControl.Host.Core
         
         public string CommandText { get; }
     }
+
+   
 }

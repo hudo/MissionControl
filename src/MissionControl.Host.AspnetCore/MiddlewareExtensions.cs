@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using MissionControl.Host.Core;
 
 namespace MissionControl.Host.AspnetCore
 {
@@ -10,8 +13,15 @@ namespace MissionControl.Host.AspnetCore
             var options = new McOptions();
 
             configuration?.Invoke(options);
+            
+            
 
             return builder.UseMiddleware<MissionControlMiddleware>(options);
+        }
+
+        public static void AddMissionControl(this IServiceCollection services)
+        {
+            Registry.RegisterServices(services);
         }
     }
 }

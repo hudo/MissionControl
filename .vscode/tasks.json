@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/tests/MissionControl.Host.Core.Tests.Unit/MissionControl.Host.Core.Tests.Unit.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
