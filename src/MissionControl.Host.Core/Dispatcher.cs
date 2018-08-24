@@ -21,7 +21,7 @@ namespace MissionControl.Host.Core
             _logger = Guard.NotNull(logger, nameof(logger));
         }
 
-        public Task<CliResponse> Invoke(Request request)
+        public async Task<CliResponse> Invoke(Request request)
         {
             var command = _parser.Parse(request);
 
@@ -29,11 +29,13 @@ namespace MissionControl.Host.Core
 
             if (conHost == null)
             {
+                // lock?
+
                 conHost = new ConHost(request.ClientId);
                 _hosts.Add(conHost);
             }
             
-            return conHost.Execute(command);
+            return await conHost.Execute(command);
         }
     }
     

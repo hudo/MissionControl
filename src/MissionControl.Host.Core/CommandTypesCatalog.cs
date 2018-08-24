@@ -57,6 +57,8 @@ namespace MissionControl.Host.Core
                 var mapping = _commandNames[name];
                 return (mapping.type, mapping.attribute);
             }
+
+            return (null, null);
         }
     }
 }
