@@ -52,7 +52,7 @@ namespace MissionControl.Host.Core
 
         public (Type type, CommandTextAttribute attributes) GetTypeByCommandName(string name)
         {
-            if (_commandNames.ContainsKey(name))
+            if (_commandNames.ContainsKey(name.ToLower()))
             {
                 var mapping = _commandNames[name];
                 return (mapping.type, mapping.attribute);

@@ -23,8 +23,6 @@ namespace MissionControl.Host.Core
 
         public async Task<CliResponse> Invoke(Request request)
         {
-            var command = _parser.Parse(request);
-
             var conHost = _hosts.FirstOrDefault(x => x.ClientId == request.ClientId);
 
             if (conHost == null)
@@ -34,8 +32,17 @@ namespace MissionControl.Host.Core
                 conHost = new ConHost(request.ClientId);
                 _hosts.Add(conHost);
             }
-            
-            return await conHost.Execute(command);
+
+            try
+            {
+                var command = _parser.Parse(request);
+
+                return await conHost.Execute(command);
+            }
+            catch (Exception e)
+            {
+
+            }
         }
     }
     
