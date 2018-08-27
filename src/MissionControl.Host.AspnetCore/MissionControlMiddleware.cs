@@ -50,12 +50,12 @@ namespace MissionControl.Host.AspnetCore
                 context.Response.ContentType = "text/html";
 
                 var uri = suffixPath.Value.Trim('/').ToLower();
-                var route = _routes.FirstOrDefault(x => x.Match(uri));
+                var route = _routes.FirstOrDefault(x => x.Match(uri, context.Request.Method.ToLower()));
 
                 if (route != null)
                 {
                     context.Response.StatusCode = 200;
-                    await route.Hadle(uri, context.Response);
+                    await route.Handle(uri, context.Request,  context.Response);
                 }
                 else
                 {

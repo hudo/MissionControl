@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
 namespace MissionControl.Host.AspnetCore.Routes
 {
+    /// <summary>
+    /// Serve static files from internal assembly resources
+    /// </summary>
     public class StaticContentRoute : Route
     {
         private readonly Assembly _assembly;
@@ -25,12 +29,12 @@ namespace MissionControl.Host.AspnetCore.Routes
             _assembly = assembly;
         }
 
-        public override bool Match(string reqUri)
+        public override bool Match(string reqUri, string method)
         {
-            return !string.IsNullOrEmpty(reqUri) && _contentTypes.ContainsKey(GetExtension(reqUri));
+            return !string.IsNullOrEmpty(reqUri) && _contentTypes.ContainsKey(GetExtension(reqUri)) && method == "get";
         }
 
-        public override async Task Hadle(string reqUri, HttpResponse response)
+        public override async Task Handle(string reqUri, HttpRequest request, HttpResponse response)
         {
             var stream = _assembly.GetManifestResourceStream("MissionControl.Host.AspnetCore.Content." + reqUri);
 

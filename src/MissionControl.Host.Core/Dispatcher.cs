@@ -41,7 +41,10 @@ namespace MissionControl.Host.Core
             }
             catch (Exception e)
             {
-
+                _logger.LogError(e, $"Error executing request '{request.Command}': {e.Message}");
+                
+                // return ErrorResponse? 
+                return new TextResponse($"Error: {e.Unwrap().Message}");
             }
         }
     }

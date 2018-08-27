@@ -1,6 +1,6 @@
 ﻿namespace MissionControl.Host.Core
 {
-    public abstract class Request
+    public class Request
     {
         public string ClientId { get; set; }
 

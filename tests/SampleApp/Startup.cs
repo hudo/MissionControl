@@ -55,6 +55,12 @@ namespace SampleApp
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
+//            app.Use(async (ctx, next) =>
+//            {
+//                var headers = ctx.Request.Headers;
+//                await next();
+//            });
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

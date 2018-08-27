@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace MissionControl.Host.AspnetCore.Routes
 {
+    /// <summary>
+    /// Serves index.html
+    /// </summary>
     public class DefaultIndexRoute : Route
     {
         private readonly Assembly _assembly;
@@ -16,7 +19,7 @@ namespace MissionControl.Host.AspnetCore.Routes
             _content = _assembly.GetManifestResourceStream("MissionControl.Host.AspnetCore.Content.index.html");
         }
 
-        public override async Task Hadle(string reqUri, HttpResponse response)
+        public override async Task Handle(string reqUri, HttpRequest request, HttpResponse response)
         {
             _content.Seek(0, SeekOrigin.Begin);
 

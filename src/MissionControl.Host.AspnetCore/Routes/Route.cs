@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
 namespace MissionControl.Host.AspnetCore.Routes
@@ -6,17 +8,28 @@ namespace MissionControl.Host.AspnetCore.Routes
     public abstract class Route
     {
         protected string _path;
+        private readonly string[] _methods;
 
-        protected Route(string path)
+        protected Route(string path, params string[] methods)
         {
             _path = path;
+            _methods = methods ?? new []{ "get" };
         }
 
-        public virtual bool Match(string reqUri)
+        /// <summary>
+        /// Check if route matches current request
+        /// </summary>
+        /// <param name="reqUri">URL part after /mc</param>
+        /// <returns>True if route match</returns>
+        public virtual bool Match(string reqUri, string method) // todo: refactor method
         {
-            return _path == reqUri;
+            return _path == reqUri && _methods.Contains(method);
         }
 
-        public abstract Task Hadle(string reqUri, HttpResponse response);
+        /// <summary>
+        /// Handle request
+        /// </summary>
+        /// <param name="reqUri">URL part after /mc</param>
+        public abstract Task Handle(string reqUri, HttpRequest request, HttpResponse response); // todo: revisit this
     }
 }
