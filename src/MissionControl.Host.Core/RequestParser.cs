@@ -48,7 +48,7 @@ namespace MissionControl.Host.Core
                 }
                 else
                 {
-                    // design how to handle args like:
+                    // design how to handle args without name, like:
                     // > copy arg1 arg2
                 }
             }
