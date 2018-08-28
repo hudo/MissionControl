@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
+using MissionControl.Host.Core.Contracts;
 
 namespace MissionControl.Host.Core
 {
-    internal interface ICommandTypesCatalog
+    public interface ICommandTypesCatalog
     {
         void ScanAssemblies(Assembly[] assemblies);
 
-        (Type type, CommandTextAttribute attributes) GetTypeByCommandName(string name);
+        (Type type, CliCommandAttribute attributes) GetTypeByCommandName(string name);
     }
 
     
@@ -18,14 +19,20 @@ namespace MissionControl.Host.Core
     {
         private readonly ILogger<CommandTypesCatalog> _logger;
         
-        private readonly Dictionary<string, (Type type, CommandTextAttribute attribute)> _commandNames = new Dictionary<string, (Type type, CommandTextAttribute attribute)>();
-
+        private readonly Dictionary<string, (Type type, CliCommandAttribute attribute)> _commandNames = new Dictionary<string, (Type type, CliCommandAttribute attribute)>();
+        
+        
         public CommandTypesCatalog(ILogger<CommandTypesCatalog> logger)
         {
             _logger = logger;
         }
         
         public void ScanAssemblies(Assembly[] assemblies)
+        {
+            DiscoverCommands(assemblies);
+        }
+
+        private void DiscoverCommands(Assembly[] assemblies)
         {
             var baseCommandType = typeof(CliCommand);
 
@@ -35,10 +42,10 @@ namespace MissionControl.Host.Core
                 select type;
 
             var count = 0;
-            
+
             foreach (var type in commandTypes)
             {
-                var attribute = type.GetCustomAttribute<CommandTextAttribute>();
+                var attribute = type.GetCustomAttribute<CliCommandAttribute>();
 
                 if (attribute != null)
                 {
@@ -50,7 +57,7 @@ namespace MissionControl.Host.Core
             _logger.LogTrace($"Discovered {count} CLI commands in assemblies {string.Join(", ", assemblies.Select(x => x.FullName))}");
         }
 
-        public (Type type, CommandTextAttribute attributes) GetTypeByCommandName(string name)
+        public (Type type, CliCommandAttribute attributes) GetTypeByCommandName(string name)
         {
             if (_commandNames.ContainsKey(name.ToLower()))
             {

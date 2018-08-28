@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using MissionControl.Host.AspnetCore.Routes;
+using MissionControl.Host.Core;
 
 namespace MissionControl.Host.AspnetCore
 {
@@ -18,7 +19,7 @@ namespace MissionControl.Host.AspnetCore
 
         private readonly List<Route> _routes;
 
-        public MissionControlMiddleware(RequestDelegate next, McOptions options)
+        public MissionControlMiddleware(RequestDelegate next, McOptions options, IDispatcher dispatcher, ICommandTypesCatalog catalog)
         {
             _next = next;
 
@@ -29,12 +30,15 @@ namespace MissionControl.Host.AspnetCore
             _urlPrefix = new PathString(options.Url);
 
             var assembly = this.GetType().GetTypeInfo().Assembly;
-            
+
             _routes = new List<Route>
             {
                 new StaticContentRoute(assembly),
-                new DefaultIndexRoute(assembly)
+                new DefaultIndexRoute(assembly),
+                new CommandsRoute(dispatcher)
             };
+
+            Task.Run(() => catalog.ScanAssemblies(options.Assemblies ?? new[] {assembly}));
         }
 
         public async Task InvokeAsync(HttpContext context)

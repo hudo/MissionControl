@@ -4,19 +4,22 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using MissionControl.Host.Core.Responses;
 using MissionControl.Host.Core.Utilities;
 
 namespace MissionControl.Host.Core
 {
     internal class Dispatcher : IDispatcher
     {
+        private readonly IConHostFactory _conHostFactory;
         private readonly IRequestParser _parser;
         private readonly ILogger<Dispatcher> _logger;
         
-        private readonly List<ConHost> _hosts = new List<ConHost>();
+        private readonly List<IConHost> _hosts = new List<IConHost>();
 
-        public Dispatcher(IRequestParser parser, ILogger<Dispatcher> logger)
+        public Dispatcher(IRequestParser parser, IConHostFactory conHostFactory,  ILogger<Dispatcher> logger)
         {
+            _conHostFactory = Guard.NotNull(conHostFactory, nameof(conHostFactory));
             _parser = Guard.NotNull(parser, nameof(parser));
             _logger = Guard.NotNull(logger, nameof(logger));
         }
@@ -28,8 +31,7 @@ namespace MissionControl.Host.Core
             if (conHost == null)
             {
                 // lock?
-
-                conHost = new ConHost(request.ClientId);
+                conHost = _conHostFactory.Create(request.ClientId);
                 _hosts.Add(conHost);
             }
 
@@ -37,14 +39,19 @@ namespace MissionControl.Host.Core
             {
                 var command = _parser.Parse(request);
 
-                return await conHost.Execute(command);
+                if (command.IsNull)
+                {
+                    // send syntax error back?
+                    return new ErrorResponse("Command not found");
+                }
+                
+                return await conHost.Execute(command.Value);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, $"Error executing request '{request.Command}': {e.Message}");
                 
-                // return ErrorResponse? 
-                return new TextResponse($"Error: {e.Unwrap().Message}");
+                return new ErrorResponse($"Error: {e.Unwrap().Message}");
             }
         }
     }

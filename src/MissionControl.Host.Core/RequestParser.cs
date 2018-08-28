@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
+using MissionControl.Host.Core.Contracts;
 using MissionControl.Host.Core.Utilities;
 
 namespace MissionControl.Host.Core
@@ -17,7 +18,7 @@ namespace MissionControl.Host.Core
             _catalog = Guard.NotNull(catalog, nameof(catalog));
         }
 
-        public CliCommand Parse(Request request)
+        public Maybe<CliCommand> Parse(Request request)
         {
             var (type, attribs) = _catalog.GetTypeByCommandName(request.Command);
 
@@ -60,6 +61,6 @@ namespace MissionControl.Host.Core
     // deserialize request to DTO props
     internal interface IRequestParser
     {
-        CliCommand Parse(Request request);
+        Maybe<CliCommand> Parse(Request request);
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Extensions.Logging;
+using MissionControl.Host.Core.Contracts;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -15,7 +16,7 @@ namespace MissionControl.Host.Core.Tests.Unit
         {
             _typeCatalogMock
                 .Setup(x => x.GetTypeByCommandName(It.Is<string>(name => name == "test")))
-                .Returns((typeof(TestCommand), new CommandTextAttribute("test")));
+                .Returns((typeof(TestCommand), new CliCommandAttribute("test")));
             
             _requestParser = new RequestParser(_typeCatalogMock.Object, Mock.Of<ILogger<RequestParser>>());
         }
@@ -25,8 +26,8 @@ namespace MissionControl.Host.Core.Tests.Unit
         {
             var command = _requestParser.Parse(new Request { Command = "test" });
             
-            command.ShouldNotBeNull();
-            command.ShouldBeOfType<TestCommand>();
+            command.IsSome.ShouldBeTrue();
+            command.Value.ShouldBeOfType<TestCommand>();
         }
 
         [Fact]
@@ -47,10 +48,10 @@ namespace MissionControl.Host.Core.Tests.Unit
                 Args = new []{ "prop1=foo", "Prop2=5", "-prop3=4.2"}
             });
             
-            command.ShouldNotBeNull();
-            command.ShouldBeOfType<TestCommand>();
+            command.IsSome.ShouldBeTrue();
+            command.Value.ShouldBeOfType<TestCommand>();
 
-            var testCommand = command as TestCommand;
+            var testCommand = command.Value as TestCommand;
             testCommand.Prop1.ShouldBe("foo");
             testCommand.Prop2.ShouldBe(5);
             testCommand.Prop3.ShouldBe(4.2m);
@@ -65,10 +66,10 @@ namespace MissionControl.Host.Core.Tests.Unit
                 Args = new []{ "prop1=1", "Prop2=foo", "-prop3=bar"}
             });
             
-            command.ShouldNotBeNull();
-            command.ShouldBeOfType<TestCommand>();
+            command.IsSome.ShouldBeTrue();
+            command.Value.ShouldBeOfType<TestCommand>();
 
-            var testCommand = command as TestCommand;
+            var testCommand = command.Value as TestCommand;
             testCommand.Prop1.ShouldBe("1");
             testCommand.Prop2.ShouldBe(0);
             testCommand.Prop3.ShouldBe(0);
