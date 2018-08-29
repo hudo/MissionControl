@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MissionControl.Host.Core.Responses;
@@ -33,6 +32,8 @@ namespace MissionControl.Host.Core
                 // lock?
                 conHost = _conHostFactory.Create(request.ClientId);
                 _hosts.Add(conHost);
+
+                _logger.LogInformation($"New ConHost created for client {request.ClientId}");
             }
 
             try

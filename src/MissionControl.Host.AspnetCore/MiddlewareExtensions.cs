@@ -13,7 +13,10 @@ namespace MissionControl.Host.AspnetCore
             var options = new McOptions();
 
             configuration?.Invoke(options);
-            
+
+            if (options.Assemblies == null)
+                options.Assemblies = new[] {Assembly.GetCallingAssembly()};
+
             return builder.UseMiddleware<MissionControlMiddleware>(options);
         }
 

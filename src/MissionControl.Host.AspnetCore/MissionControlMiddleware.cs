@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using MissionControl.Host.AspnetCore.Routes;
 using MissionControl.Host.Core;
 
@@ -14,12 +16,16 @@ namespace MissionControl.Host.AspnetCore
     {
         private readonly RequestDelegate _next;
         private readonly McOptions _options;
+        private readonly ILogger<MissionControlMiddleware> _logger;
 
         private readonly PathString _urlPrefix;
 
         private readonly List<Route> _routes;
 
-        public MissionControlMiddleware(RequestDelegate next, McOptions options, IDispatcher dispatcher, ICommandTypesCatalog catalog)
+        public MissionControlMiddleware(RequestDelegate next, McOptions options, 
+            IDispatcher dispatcher, 
+            ICommandTypesCatalog catalog,
+            ILogger<MissionControlMiddleware> logger)
         {
             _next = next;
 
@@ -27,7 +33,9 @@ namespace MissionControl.Host.AspnetCore
                 throw new ArgumentNullException(nameof(options.Authentication), "Request authentication nor provided");
 
             _options = options;
+            _logger = logger;
             _urlPrefix = new PathString(options.Url);
+
 
             var assembly = this.GetType().GetTypeInfo().Assembly;
 
@@ -48,6 +56,7 @@ namespace MissionControl.Host.AspnetCore
                 if (!_options.Authentication(context.Request))
                 {
                     context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    _logger.LogDebug($"Request not authorized: {context.Request.Path}");
                     return;
                 }
 
@@ -59,10 +68,15 @@ namespace MissionControl.Host.AspnetCore
                 if (route != null)
                 {
                     context.Response.StatusCode = 200;
+
+                    _logger.LogTrace($"Route [{route.GetType().Name}] matched for request {context.Request.Path}");
+
                     await route.Handle(uri, context.Request,  context.Response);
                 }
                 else
                 {
+                    _logger.LogDebug($"Route not found for request {context.Request.Path}");
+
                     context.Response.StatusCode = 404;
                 }
             }

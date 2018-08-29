@@ -54,7 +54,7 @@ namespace MissionControl.Host.Core
                 }
             }
 
-            _logger.LogTrace($"Discovered {count} CLI commands in assemblies {string.Join(", ", assemblies.Select(x => x.FullName))}");
+            _logger.LogDebug($"Discovered {count} CLI commands in assemblies {string.Join(", ", assemblies.Select(x => x.GetName().Name))}");
         }
 
         public (Type type, CliCommandAttribute attributes) GetTypeByCommandName(string name)

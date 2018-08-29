@@ -40,7 +40,7 @@ namespace MissionControl.Host.Core
                         if (propertyInfo != null)
                             propertyInfo.SetValue(command, Convert.ChangeType(parts[1], propertyInfo.PropertyType), null);
                         else
-                            _logger.LogTrace($"Field {key} not found on type {type.Name}");
+                            _logger.LogTrace($"Field '{key}' not found on type '{type.Name}'");
                     }
                     catch (Exception e)
                     {

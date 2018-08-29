@@ -8,4 +8,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\MissionControl.Host.AspnetCore\MissionControl.Host.AspnetCore.csproj" />
   </ItemGroup>
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="http://json.schemastore.org/asmdef" /></VisualStudio></ProjectExtensions>
 </Project>

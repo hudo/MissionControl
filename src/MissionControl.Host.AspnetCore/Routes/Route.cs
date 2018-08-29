@@ -13,7 +13,10 @@ namespace MissionControl.Host.AspnetCore.Routes
         protected Route(string path, params string[] methods)
         {
             _path = path;
-            _methods = methods ?? new []{ "get" };
+            _methods = methods;
+
+            if (_methods == null || _methods.Length == 0)
+                _methods = new[] {"get"};
         }
 
         /// <summary>

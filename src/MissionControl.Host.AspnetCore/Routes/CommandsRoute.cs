@@ -22,7 +22,7 @@ namespace MissionControl.Host.AspnetCore.Routes
 
         public override bool Match(string reqUri, string method)
         {
-            return reqUri.StartsWith("cmd/") && method == "post";
+            return reqUri.StartsWith("cmd/"); //&& method == "post";
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace MissionControl.Host.AspnetCore.Routes
             // todo: what if clientId is not in header?
             req.ClientId = request.Headers["mc.clientid"].FirstOrDefault();
             
-            req.Command = reqUri.Trim('/');
+            req.Command = reqUri.Replace("cmd/", "").Trim('/'); // todo: ugly, remove "cmd/" 
 
             if (request.Headers.TryGetValue(_argsHeader, out var values))
             {
