@@ -22,7 +22,9 @@ namespace MissionControl.Host.AspnetCore
 
         private readonly List<Route> _routes;
 
-        public MissionControlMiddleware(RequestDelegate next, McOptions options, 
+        public MissionControlMiddleware(RequestDelegate next, 
+            McOptions options,
+            Assembly[] assemblies,
             IDispatcher dispatcher, 
             ICommandTypesCatalog catalog,
             ILogger<MissionControlMiddleware> logger)
@@ -46,7 +48,7 @@ namespace MissionControl.Host.AspnetCore
                 new CommandsRoute(dispatcher)
             };
 
-            Task.Run(() => catalog.ScanAssemblies(options.Assemblies ?? new[] {assembly}));
+            Task.Run(() => catalog.ScanAssemblies(assemblies ?? new[] {assembly}));
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -67,6 +69,7 @@ namespace MissionControl.Host.AspnetCore
 
                 if (route != null)
                 {
+                   
                     context.Response.StatusCode = 200;
 
                     _logger.LogTrace($"Route [{route.GetType().Name}] matched for request {context.Request.Path}");

@@ -10,6 +10,5 @@ namespace MissionControl.Host.Core.Responses
         }
         
         public Guid Id { get; }
-        public Guid RequestId { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using MissionControl.Host.Core;
+using Newtonsoft.Json;
 
 namespace MissionControl.Host.AspnetCore.Routes
 {
@@ -51,10 +52,15 @@ namespace MissionControl.Host.AspnetCore.Routes
                     }));
                 
             }
+            
+            // flow:
+            // - dispatcher (parse request, creates ConHost)
+            // - conHost (finds handler, internal commands queue)
+            // - command handler
 
             var cliResponse = await _dispatcher.Invoke(req);
 
-            await response.WriteAsync("ok"); // todo
+            await response.WriteAsync(JsonConvert.SerializeObject(cliResponse)); // todo
         }
     }
 }

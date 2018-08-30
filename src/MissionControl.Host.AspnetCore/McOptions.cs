@@ -19,10 +19,5 @@ namespace MissionControl.Host.AspnetCore
         public string Url { get; set; }
 
         public Func<HttpRequest, bool> Authentication { get; set; }
-
-        /// <summary>
-        /// Assemblies containing commands and handlers
-        /// </summary>
-        public Assembly[] Assemblies;
     }
 }

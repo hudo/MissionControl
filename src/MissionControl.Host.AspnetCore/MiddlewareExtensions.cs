@@ -8,21 +8,26 @@ namespace MissionControl.Host.AspnetCore
 {
     public static class MiddlewareExtensions
     {
+        private static Assembly[] _assemblies;
+        
         public static IApplicationBuilder UseMissingControl(this IApplicationBuilder builder, Action<McOptions> configuration = null)
         {
             var options = new McOptions();
 
             configuration?.Invoke(options);
 
-            if (options.Assemblies == null)
-                options.Assemblies = new[] {Assembly.GetCallingAssembly()};
-
-            return builder.UseMiddleware<MissionControlMiddleware>(options);
+            return builder.UseMiddleware<MissionControlMiddleware>(options, _assemblies);
         }
 
-        public static void AddMissionControl(this IServiceCollection services)
+        /// <summary>
+        /// Register services into container
+        /// </summary>
+        /// <param name="assemblies">Assemblies containing commands and handlers</param>
+        public static void AddMissionControl(this IServiceCollection services, params Assembly[] assemblies)
         {
-            Registry.RegisterServices(services);
+            _assemblies = assemblies.Length > 0 ? assemblies : new[] {Assembly.GetCallingAssembly()};
+            
+            Registry.RegisterServices(services, _assemblies);
         }
     }
 }
