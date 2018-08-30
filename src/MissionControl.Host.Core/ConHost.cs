@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MissionControl.Host.Core.Contracts;
 using MissionControl.Host.Core.Responses;
@@ -36,28 +35,37 @@ namespace MissionControl.Host.Core
 
             foreach (var command in _inbox.GetConsumingEnumerable())
             {
-                // find handler and execute
+                var cmdName = command.command.GetType().Name;
 
                 try
                 {
                     var stopwatch = Stopwatch.StartNew();
                     
-                    var handlertype = typeof(ICliCommandHandler<>).MakeGenericType(command.command.GetType());
+                    var handlerType = typeof(ICliCommandHandler<>).MakeGenericType(command.command.GetType());
 
-                    var service = _serviceProvider.GetService(handlertype);
+                    var handler = _serviceProvider.GetService(handlerType);
 
-                    Task<CliResponse> task = service.GetType().GetMethod("Handle").Invoke(service, new[] {command.command}) as Task<CliResponse>;
+                    if (handler == null)
+                    {
+                        _logger.LogWarning($"Handler for command [{cmdName}] not found.");
 
-                    var response = await task;
+                        command.completionSource.SetResult(new ErrorResponse($"Handler not found for command [{cmdName}]"));
+
+                        continue;
+                    }
+
+                    var handleTask = handler.GetType().GetMethod("Handle").Invoke(handler, new[] {command.command}) as Task<CliResponse>;
+
+                    var response = await handleTask;
                     
                     stopwatch.Stop();
-                    _logger.LogInformation($"Command [{command.command.GetType().Name}] executed in {stopwatch.ElapsedMilliseconds}ms");
+                    _logger.LogInformation($"Command [{cmdName}] executed in {stopwatch.ElapsedMilliseconds}ms");
 
                     command.completionSource.SetResult(response);                    
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, $"Error executing command [{command.command.GetType().Name}]: {e.Unwrap().Message}");
+                    _logger.LogError(e, $"Error executing command [{cmdName}]: {e.Unwrap().Message}");
                     
                     command.completionSource.SetResult(new ErrorResponse(e.Unwrap().Message));
                 }
@@ -85,26 +93,5 @@ namespace MissionControl.Host.Core
         Task<CliResponse> Execute(CliCommand command);
     }
 
-    internal interface IConHostFactory
-    {
-        IConHost Create(string clientId);
-    }
-
-    internal class ConHostFactory : IConHostFactory
-    {
-        private readonly ILogger<ConHost> _logger;
-        private readonly IServiceProvider _serviceProvider;
-
-        public ConHostFactory(ILogger<ConHost> logger, IServiceProvider serviceProvider)
-        {
-            _logger = logger;
-            _serviceProvider = serviceProvider;
-        }
-
-        public IConHost Create(string clientId)
-        {
-            return new ConHost(clientId, _serviceProvider, _logger);
-        }
-    }
-
+    
 }

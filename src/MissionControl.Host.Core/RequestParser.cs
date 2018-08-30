@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
 using MissionControl.Host.Core.Contracts;
 using MissionControl.Host.Core.Utilities;
@@ -25,7 +24,12 @@ namespace MissionControl.Host.Core
             if (type == null)
                 throw new ArgumentException($"Command '{request.Command}' not found.");
 
-            var command = Activator.CreateInstance(type);
+            var command = Activator.CreateInstance(type) as CliCommand;
+
+            if (command == null)
+                throw new Exception("Command needs to inherit CliCommand");
+
+            command.CorrelationId = request.CorrelationId;
 
             foreach (var arg in request.Args)
             {
@@ -54,7 +58,7 @@ namespace MissionControl.Host.Core
                 }
             }
 
-            return command as CliCommand;
+            return command;
         }
     }
     

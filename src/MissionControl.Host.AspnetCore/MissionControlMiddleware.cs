@@ -47,8 +47,6 @@ namespace MissionControl.Host.AspnetCore
                 new DefaultIndexRoute(assembly),
                 new CommandsRoute(dispatcher)
             };
-
-            Task.Run(() => catalog.ScanAssemblies(assemblies ?? new[] {assembly}));
         }
 
         public async Task InvokeAsync(HttpContext context)

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MissionControl.Host.Core.Contracts;
 using Moq;
@@ -8,18 +9,18 @@ namespace MissionControl.Host.Core.Tests.Unit
 {
     public class CommandTypeCatalogTests
     {
-        private readonly Mock<ILogger<CommandTypesCatalog>> _loggerMock = new Mock<ILogger<CommandTypesCatalog>>();
+        private readonly Mock<IServiceCollection> _servicesMock = new Mock<IServiceCollection>();
         private readonly CommandTypesCatalog _catalog;
 
         public CommandTypeCatalogTests()
         {
-            _catalog = new CommandTypesCatalog(_loggerMock.Object);
+            _catalog = new CommandTypesCatalog();
         }
 
         [Fact]
         public void Scan_and_find_known_command()
         {
-            _catalog.ScanAssemblies(new[] {this.GetType().Assembly});
+            _catalog.ScanAssemblies(new[] {this.GetType().Assembly}, _servicesMock.Object);
             
             var (type, _) = _catalog.GetTypeByCommandName("foo");
             
@@ -29,7 +30,7 @@ namespace MissionControl.Host.Core.Tests.Unit
         [Fact]
         public void Unknown_command_name_returns_null()
         {
-            _catalog.ScanAssemblies(new []{ GetType().Assembly});
+            _catalog.ScanAssemblies(new []{ GetType().Assembly}, _servicesMock.Object);
 
             var (type, _) = _catalog.GetTypeByCommandName("foobar");
 

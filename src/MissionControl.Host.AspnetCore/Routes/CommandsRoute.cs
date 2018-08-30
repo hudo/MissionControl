@@ -13,7 +13,7 @@ namespace MissionControl.Host.AspnetCore.Routes
     public class CommandsRoute : Route
     {
         private readonly IDispatcher _dispatcher;
-        private static string _clientIdHeader = "mc.clientid";
+        private static string _idHeader = "mc.id";
         private static string _argsHeader = "mc.args"; 
         
         public CommandsRoute(IDispatcher dispatcher) : base("")
@@ -37,9 +37,9 @@ namespace MissionControl.Host.AspnetCore.Routes
             var args = new List<(string key, string value)>();
 
             // todo: what if clientId is not in header?
-            req.ClientId = request.Headers["mc.clientid"].FirstOrDefault();
+            req.CorrelationId = request.Headers[_idHeader].FirstOrDefault();
             
-            req.Command = reqUri.Replace("cmd/", "").Trim('/'); // todo: ugly, remove "cmd/" 
+            req.Command = reqUri.Replace("cmd/", "").Trim('/'); // todo: ugly
 
             if (request.Headers.TryGetValue(_argsHeader, out var values))
             {

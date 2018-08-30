@@ -28,8 +28,8 @@ namespace MissionControl.Host.Core.Tests.Unit
         [Fact]
         public async Task Reuse_ConHost_for_same_clientId()
         {
-            var resp1 = await _dispatcher.Invoke(new Request {ClientId = "1"});
-            var resp2 = await _dispatcher.Invoke(new Request {ClientId = "1"});
+            var resp1 = await _dispatcher.Invoke(new Request {CorrelationId = "1"});
+            var resp2 = await _dispatcher.Invoke(new Request {CorrelationId = "1"});
 
             _hostFactoryMock
                 .Verify(x => x.Create(It.IsAny<string>()), Times.Once);
@@ -42,8 +42,8 @@ namespace MissionControl.Host.Core.Tests.Unit
         [Fact]
         public async Task Create_new_ConHost_for_different_ClientId()
         {
-            await _dispatcher.Invoke(new Request {ClientId = "1"});
-            await _dispatcher.Invoke(new Request {ClientId = "2"});
+            await _dispatcher.Invoke(new Request {CorrelationId = "1"});
+            await _dispatcher.Invoke(new Request {CorrelationId = "2"});
             
             _hostFactoryMock
                 .Verify(x => x.Create(It.IsAny<string>()), Times.Exactly(2));

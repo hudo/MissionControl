@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using MissionControl.Host.Core.Contracts;
 
 namespace MissionControl.Host.Core
 {
     public interface ICommandTypesCatalog
     {
-        void ScanAssemblies(Assembly[] assemblies);
+        void ScanAssemblies(Assembly[] assemblies, IServiceCollection services);
 
         (Type type, CliCommandAttribute attributes) GetTypeByCommandName(string name);
     }
@@ -17,19 +18,18 @@ namespace MissionControl.Host.Core
     
     internal class CommandTypesCatalog : ICommandTypesCatalog
     {
-        private readonly ILogger<CommandTypesCatalog> _logger;
-        
         private readonly Dictionary<string, (Type type, CliCommandAttribute attribute)> _commandNames = new Dictionary<string, (Type type, CliCommandAttribute attribute)>();
         
-        
-        public CommandTypesCatalog(ILogger<CommandTypesCatalog> logger)
+        public void ScanAssemblies(Assembly[] assemblies, IServiceCollection services)
         {
-            _logger = logger;
-        }
-        
-        public void ScanAssemblies(Assembly[] assemblies)
-        {
+            var stopwatch = Stopwatch.StartNew();
+
             DiscoverCommands(assemblies);
+
+            RegisterHandlers(services, assemblies);
+
+            stopwatch.Stop();
+            Console.WriteLine($"Assembly scanning done in {stopwatch.ElapsedMilliseconds}ms");
         }
 
         private void DiscoverCommands(Assembly[] assemblies)
@@ -54,7 +54,25 @@ namespace MissionControl.Host.Core
                 }
             }
 
-            _logger.LogDebug($"Discovered {count} CLI commands in assemblies {string.Join(", ", assemblies.Select(x => x.GetName().Name))}");
+            Console.WriteLine($"Discovered {count} CLI commands in assemblies {string.Join(", ", assemblies.Select(x => x.GetName().Name))}");
+        }
+
+        private void RegisterHandlers(IServiceCollection services, Assembly[] assemblies)
+        {
+            var handler = typeof(ICliCommandHandler<>);
+
+            var types =
+                from ass in assemblies
+                from type in ass.GetTypes()
+                from i in type.GetInterfaces()
+                where i.IsGenericType && handler.IsAssignableFrom(i.GetGenericTypeDefinition())
+                select type;
+
+            foreach (var type in types)
+            {
+                var interfaces = type.GetInterfaces().FirstOrDefault();
+                services.AddTransient(interfaces, type);
+            }
         }
 
         public (Type type, CliCommandAttribute attributes) GetTypeByCommandName(string name)
@@ -65,7 +83,7 @@ namespace MissionControl.Host.Core
                 return (mapping.type, mapping.attribute);
             }
 
-            return (null, null);
+            return (null, null); // any better way of returning nullable tuple? 
         }
     }
 }

@@ -10,6 +10,9 @@ namespace SampleApp.cli
         public string Foo { get; set; }
     }
 
+    [CliCommand("sample2")]
+    public class Sample2Command : CliCommand { }
+
     public class SampleHandler: ICliCommandHandler<SampleCommand>
     {
         public Task<CliResponse> Handle(SampleCommand command)

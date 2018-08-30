@@ -25,15 +25,15 @@ namespace MissionControl.Host.Core
 
         public async Task<CliResponse> Invoke(Request request)
         {
-            var conHost = _hosts.FirstOrDefault(x => x.ClientId == request.ClientId);
+            var conHost = _hosts.FirstOrDefault(x => x.ClientId == request.CorrelationId);
 
             if (conHost == null)
             {
                 // lock?
-                conHost = _conHostFactory.Create(request.ClientId);
+                conHost = _conHostFactory.Create(request.CorrelationId);
                 _hosts.Add(conHost);
 
-                _logger.LogInformation($"New ConHost created for client {request.ClientId}");
+                _logger.LogInformation($"New ConHost created for client {request.CorrelationId}");
             }
 
             try

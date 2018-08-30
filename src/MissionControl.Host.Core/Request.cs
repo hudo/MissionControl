@@ -7,7 +7,7 @@
             Args = new string[0];    
         }
         
-        public string ClientId { get; set; }
+        public string CorrelationId { get; set; }
 
         public string Command { get; set; }
 
