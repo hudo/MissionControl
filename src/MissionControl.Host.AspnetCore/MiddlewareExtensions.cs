@@ -26,7 +26,6 @@ namespace MissionControl.Host.AspnetCore
         public static void AddMissionControl(this IServiceCollection services, params Assembly[] assemblies)
         {
             _assemblies = assemblies.Length > 0 ? assemblies : new[] {Assembly.GetCallingAssembly()};
-            
             Registry.RegisterServices(services, _assemblies);
         }
     }

@@ -6,7 +6,5 @@
         {
             Content = content;
         }
-        
-        public string Content { get; set; }
     }
 }

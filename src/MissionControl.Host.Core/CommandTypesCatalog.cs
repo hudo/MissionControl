@@ -42,11 +42,10 @@ namespace MissionControl.Host.Core
                 select type;
 
             var count = 0;
-
+            
             foreach (var type in commandTypes)
             {
                 var attribute = type.GetCustomAttribute<CliCommandAttribute>();
-
                 if (attribute != null)
                 {
                     _commandNames.Add(attribute.CommandText.ToLower(), (type, attribute));

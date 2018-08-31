@@ -6,7 +6,5 @@
         {
             Content = message;
         }
-        
-        public string Content { get; set; }
     }
 }

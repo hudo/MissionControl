@@ -1,0 +1,22 @@
+body {
+    font-family: Menlo, Consolas, Monospace;
+    font-size: 0.85rem;   
+}
+
+.cli:before {
+    content: '>';
+    position: absolute;
+    top: 0.9rem;
+    left: 0.4rem;
+    width: 12px;
+    height: 12px;
+}
+
+.cli {
+    resize: none;
+    border: 0;
+    padding: 0.6rem;
+    display: block;
+    width: 100%;
+    background: none;
+}

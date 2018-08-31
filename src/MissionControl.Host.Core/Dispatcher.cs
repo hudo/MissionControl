@@ -32,14 +32,12 @@ namespace MissionControl.Host.Core
                 // lock?
                 conHost = _conHostFactory.Create(request.CorrelationId);
                 _hosts.Add(conHost);
-
                 _logger.LogInformation($"New ConHost created for client {request.CorrelationId}");
             }
 
             try
             {
                 var command = _parser.Parse(request);
-
                 if (command.IsNull)
                 {
                     // send syntax error back?
@@ -51,7 +49,6 @@ namespace MissionControl.Host.Core
             catch (Exception e)
             {
                 _logger.LogError(e, $"Error executing request '{request.Command}': {e.Message}");
-                
                 return new ErrorResponse($"Error: {e.Unwrap().Message}");
             }
         }

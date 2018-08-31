@@ -32,41 +32,32 @@ namespace MissionControl.Host.Core
         private async Task ProcessInbox()
         {
             _logger.LogDebug("Started processing ConHost commands");
-
             foreach (var command in _inbox.GetConsumingEnumerable())
             {
                 var cmdName = command.command.GetType().Name;
-
                 try
                 {
                     var stopwatch = Stopwatch.StartNew();
-                    
                     var handlerType = typeof(ICliCommandHandler<>).MakeGenericType(command.command.GetType());
-
                     var handler = _serviceProvider.GetService(handlerType);
 
                     if (handler == null)
                     {
                         _logger.LogWarning($"Handler for command [{cmdName}] not found.");
-
                         command.completionSource.SetResult(new ErrorResponse($"Handler not found for command [{cmdName}]"));
-
                         continue;
                     }
 
                     var handleTask = handler.GetType().GetMethod("Handle").Invoke(handler, new[] {command.command}) as Task<CliResponse>;
-
                     var response = await handleTask;
-                    
+
                     stopwatch.Stop();
                     _logger.LogInformation($"Command [{cmdName}] executed in {stopwatch.ElapsedMilliseconds}ms");
-
                     command.completionSource.SetResult(response);                    
                 }
                 catch (Exception e)
                 {
                     _logger.LogError(e, $"Error executing command [{cmdName}]: {e.Unwrap().Message}");
-                    
                     command.completionSource.SetResult(new ErrorResponse(e.Unwrap().Message));
                 }
             }
@@ -76,13 +67,10 @@ namespace MissionControl.Host.Core
         { 
             if (_inbox.IsAddingCompleted)
                 throw new ApplicationException("ConHost stopped"); 
-
-            _logger.LogDebug($"Command [{command.GetType().Name}] scheduled for processing: {JsonConvert.SerializeObject(command)}");
-
+            
             var completionSource = new TaskCompletionSource<CliResponse>();
-
-            _inbox.Add((command, completionSource));
-
+            _inbox.Add((command, completionSource));            
+            _logger.LogDebug($"Command [{command.GetType().Name}] scheduled for processing: {JsonConvert.SerializeObject(command)}");
             return completionSource.Task;
         }
     }

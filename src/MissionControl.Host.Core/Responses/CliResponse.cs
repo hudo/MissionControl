@@ -10,5 +10,7 @@ namespace MissionControl.Host.Core.Responses
         }
         
         public Guid Id { get; }
+
+        public string Content { get; set; }
     }
 }

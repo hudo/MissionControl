@@ -3,9 +3,21 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
-    <title></title>
+    <title>Mission Control CLI Terminal</title>
+    <link href="/mc/styles.css" rel="stylesheet">
+    <script src="/mc/fetch.js"></script>
+    <script src="/mc/script.js"></script>
 </head>
 <body>
-    hello 2!
+    <div class="main">
+        <div class="output-container">
+            <div class="output-item">
+                MC starting ...
+            </div>
+        </div>
+        <div class="input-container">
+            <textarea class="cli" rows="1" autofocus="true"></textarea>
+        </div>
+    </div>
 </body>
 </html>

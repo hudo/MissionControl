@@ -38,7 +38,6 @@ namespace MissionControl.Host.AspnetCore.Routes
 
             // todo: what if clientId is not in header?
             req.CorrelationId = request.Headers[_idHeader].FirstOrDefault();
-            
             req.Command = reqUri.Replace("cmd/", "").Trim('/'); // todo: ugly
 
             if (request.Headers.TryGetValue(_argsHeader, out var values))
@@ -52,15 +51,18 @@ namespace MissionControl.Host.AspnetCore.Routes
                     }));
                 
             }
-            
-            // flow:
-            // - dispatcher (parse request, creates ConHost)
-            // - conHost (finds handler, internal commands queue)
-            // - command handler
 
             var cliResponse = await _dispatcher.Invoke(req);
+            
+            // very basic rendering, refactor this
 
-            await response.WriteAsync(JsonConvert.SerializeObject(cliResponse)); // todo
+            var type = cliResponse.GetType().Name.Replace("Response", "").ToLower();
+            await response.WriteAsync(JsonConvert.SerializeObject(new
+            {
+                type,
+                content = cliResponse.Content,
+                commandId = req.CorrelationId
+            })); 
         }
     }
 }
