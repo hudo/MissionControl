@@ -48,16 +48,18 @@ namespace MissionControl.Host.Core
                         continue;
                     }
 
-                    var handleTask = handler.GetType().GetMethod("Handle").Invoke(handler, new[] {command.command}) as Task<CliResponse>;
+                    var handleTask = handler.GetType().GetMethod("Handle").Invoke(handler, new object[] {command.command}) as Task<CliResponse>;
                     var response = await handleTask;
 
                     stopwatch.Stop();
                     _logger.LogInformation($"Command [{cmdName}] executed in {stopwatch.ElapsedMilliseconds}ms");
+                    
                     command.completionSource.SetResult(response);                    
                 }
                 catch (Exception e)
                 {
                     _logger.LogError(e, $"Error executing command [{cmdName}]: {e.Unwrap().Message}");
+                    
                     command.completionSource.SetResult(new ErrorResponse(e.Unwrap().Message));
                 }
             }
@@ -69,8 +71,11 @@ namespace MissionControl.Host.Core
                 throw new ApplicationException("ConHost stopped"); 
             
             var completionSource = new TaskCompletionSource<CliResponse>();
-            _inbox.Add((command, completionSource));            
+            
+            _inbox.Add((command, completionSource));
+            
             _logger.LogDebug($"Command [{command.GetType().Name}] scheduled for processing: {JsonConvert.SerializeObject(command)}");
+            
             return completionSource.Task;
         }
     }

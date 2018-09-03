@@ -33,8 +33,25 @@ namespace MissionControl.Host.AspnetCore.Routes
         /// </summary>
         public override async Task Handle(string reqUri, HttpRequest request, HttpResponse response)
         {
+            var req = BuildRequest(reqUri, request);
+
+            var cliResponse = await _dispatcher.Invoke(req);
+            
+            // very basic rendering, refactor this
+
+            var type = cliResponse.GetType().Name.Replace("Response", "").ToLower();
+            
+            await response.WriteAsync(JsonConvert.SerializeObject(new
+            {
+                type,
+                content = cliResponse.Content,
+                commandId = req.CorrelationId
+            })); 
+        }
+
+        private static Request BuildRequest(string reqUri, HttpRequest request)
+        {
             var req = new Request();
-            var args = new List<(string key, string value)>();
 
             // todo: what if clientId is not in header?
             req.CorrelationId = request.Headers[_idHeader].FirstOrDefault();
@@ -42,27 +59,10 @@ namespace MissionControl.Host.AspnetCore.Routes
 
             if (request.Headers.TryGetValue(_argsHeader, out var values))
             {
-                args.AddRange(values[0]
-                    .Split(';')
-                    .Select(x =>
-                    {
-                        var arg = x.Split('#');
-                        return (key: arg[0], value: arg[1]);
-                    }));
-                
+                req.Args = values[0].Split(';');
             }
 
-            var cliResponse = await _dispatcher.Invoke(req);
-            
-            // very basic rendering, refactor this
-
-            var type = cliResponse.GetType().Name.Replace("Response", "").ToLower();
-            await response.WriteAsync(JsonConvert.SerializeObject(new
-            {
-                type,
-                content = cliResponse.Content,
-                commandId = req.CorrelationId
-            })); 
+            return req;
         }
     }
 }

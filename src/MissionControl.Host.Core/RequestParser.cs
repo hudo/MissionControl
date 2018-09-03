@@ -31,6 +31,13 @@ namespace MissionControl.Host.Core
 
             command.CorrelationId = request.CorrelationId;
 
+            ParseArguments(request, type, command);
+
+            return command;
+        }
+
+        private void ParseArguments(Request request, Type type, CliCommand command)
+        {
             foreach (var arg in request.Args)
             {
                 if (arg.Contains("="))
@@ -57,8 +64,6 @@ namespace MissionControl.Host.Core
                     // > copy arg1 arg2
                 }
             }
-
-            return command;
         }
     }
     
