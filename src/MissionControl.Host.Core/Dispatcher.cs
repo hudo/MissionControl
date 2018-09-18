@@ -51,7 +51,7 @@ namespace MissionControl.Host.Core
 
             try
             {
-                registration.LastUpdated = DateTime.UtcNow;
+                lock (_lock) registration.LastUpdated = DateTime.UtcNow;
                 
                 var command = _parser.Parse(request);
                 

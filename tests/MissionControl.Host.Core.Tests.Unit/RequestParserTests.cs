@@ -45,7 +45,7 @@ namespace MissionControl.Host.Core.Tests.Unit
             var command = _requestParser.Parse(new Request
             {
                 Command = "test",
-                Args = new []{ "prop1=foo", "Prop2=5", "-prop3=4.2"}
+                Args = new []{ "prop1=foo", "Prop2=5", "-prop3=4.2", "foo=bar"}
             });
             
             command.IsSome.ShouldBeTrue();

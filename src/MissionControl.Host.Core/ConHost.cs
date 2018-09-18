@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace MissionControl.Host.Core
 {
-    public class ConHost : IConHost
+    public class ConHost : IConHost, IDisposable
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<ConHost> _logger;
@@ -77,6 +77,12 @@ namespace MissionControl.Host.Core
             _logger.LogDebug($"Command [{command.GetType().Name}] scheduled for processing: {JsonConvert.SerializeObject(command)}");
             
             return completionSource.Task;
+        }
+
+        public void Dispose()
+        {
+            _inbox.CompleteAdding();
+            _inbox.Dispose();
         }
     }
 

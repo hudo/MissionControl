@@ -1,12 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Content\script.ts" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="Content\index.html" />
-    <EmbeddedResource Include="Content\styles.css" />
     <EmbeddedResource Include="Content\script.js" />
+    <EmbeddedResource Include="Content\styles.css" />
     <EmbeddedResource Include="Content\fetch.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="Content\script.ts" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.0" />

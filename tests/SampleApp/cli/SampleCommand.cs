@@ -17,7 +17,7 @@ namespace SampleApp.cli
     {
         public Task<CliResponse> Handle(SampleCommand command)
         {
-            return Task.FromResult(new TextResponse("sample handler response") as CliResponse);
+            return Task.FromResult(new TextResponse($"sample handler response: {command.Foo}") as CliResponse);
         }
     }
 }
