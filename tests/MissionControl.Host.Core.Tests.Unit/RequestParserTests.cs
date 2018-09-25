@@ -75,11 +75,28 @@ namespace MissionControl.Host.Core.Tests.Unit
             testCommand.Prop3.ShouldBe(0);
         }
 
+        [Fact]
+        public void Map_empty_value_to_boolean()
+        {
+            var command = _requestParser.Parse(new Request
+            {
+                Command = "test",
+                Args = new []{ "-prop4"}
+            });
+            
+            command.IsSome.ShouldBeTrue();
+            command.Value.ShouldBeOfType<TestCommand>();
+
+            var testCommand = command.Value as TestCommand;
+            testCommand.Prop4.ShouldBeTrue();
+        }
+
         private class TestCommand : CliCommand
         {
             public string Prop1 { get; set; }
             public int Prop2 { get; set; }
             public decimal Prop3 { get; set; }
+            public bool Prop4 { get; set; }
         }
     }
 }

@@ -40,28 +40,40 @@ namespace MissionControl.Host.Core
         {
             foreach (var arg in request.Args)
             {
-                if (arg.Contains("="))
+                var key = "";
+                try
                 {
+                    // todo: ugly, refactor!
+                    
                     var parts = arg.Split('=');
-                    var key = parts[0].TrimStart('-');
+                    key = parts[0].TrimStart('-');
                     var propertyInfo = type.GetProperty(key, BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.Instance);
 
-                    try
+                    if (propertyInfo != null)
                     {
-                        if (propertyInfo != null)
-                            propertyInfo.SetValue(command, Convert.ChangeType(parts[1], propertyInfo.PropertyType), null);
-                        else
-                            _logger.LogTrace($"Field '{key}' not found on type '{type.Name}'");
+                        var value = "";
+                        
+                        switch (parts.Length)
+                        {
+                            case 1 when propertyInfo.PropertyType == typeof(bool):
+                                value = "True";
+                                break;
+                            case 1:
+                                value = "";
+                                break;
+                            default:
+                                value = parts[1];
+                                break;
+                        }
+
+                        propertyInfo.SetValue(command, Convert.ChangeType(value, propertyInfo.PropertyType), null);
                     }
-                    catch (Exception e)
-                    {
-                        _logger.LogError(e, $"Error mapping value {key} to {type.Name}");
-                    }
+                    else
+                        _logger.LogTrace($"Field '{key}' not found on type '{type.Name}'");
                 }
-                else
+                catch (Exception e)
                 {
-                    // design how to handle args without name, like:
-                    // > copy arg1 arg2
+                    _logger.LogError(e, $"Error mapping value {key} to {type.Name}");
                 }
             }
         }
