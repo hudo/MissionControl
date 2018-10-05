@@ -10,6 +10,9 @@ using Newtonsoft.Json;
 
 namespace MissionControl.Host.Core
 {
+    /// <summary>
+    /// Host for one terminal window. Has list of incoming commands and executes them in FIFO order
+    /// </summary>
     public class ConHost : IConHost, IDisposable
     {
         private readonly IServiceProvider _serviceProvider;
@@ -38,19 +41,13 @@ namespace MissionControl.Host.Core
                 try
                 {
                     var stopwatch = Stopwatch.StartNew();
-                    var handlerType = typeof(ICliCommandHandler<>).MakeGenericType(command.command.GetType());
-                    var handler = _serviceProvider.GetService(handlerType);
 
-                    if (handler == null)
-                    {
-                        _logger.LogWarning($"Handler for command [{cmdName}] not found.");
-                        command.completionSource.SetResult(new ErrorResponse($"Handler not found for command [{cmdName}]"));
-                        continue;
-                    }
-
-                    var handleTask = handler.GetType().GetMethod("Handle").Invoke(handler, new object[] {command.command}) as Task<CliResponse>;
+                    var handleTask = ResolveHandler(command.command, command.completionSource, cmdName);
+                    
+                    if (handleTask == null) continue;
+                    
                     var response = await handleTask;
-
+                    
                     stopwatch.Stop();
                     _logger.LogInformation($"Command [{cmdName}] executed in {stopwatch.ElapsedMilliseconds}ms");
                     
@@ -62,6 +59,32 @@ namespace MissionControl.Host.Core
                     
                     command.completionSource.SetResult(new ErrorResponse(e.Unwrap().Message));
                 }
+            }
+        }
+
+        private Task<CliResponse> ResolveHandler(CliCommand command, TaskCompletionSource<CliResponse> completionSource, string cmdName)
+        {
+            var handlerType = typeof(ICliCommandHandler<>).MakeGenericType(command.GetType());
+            var handler = _serviceProvider.GetService(handlerType);
+
+            if (handler == null)
+            {
+                _logger.LogWarning($"Handler for command [{cmdName}] not found.");
+                completionSource.SetResult(new ErrorResponse($"Handler not found for command [{cmdName}]"));
+                return null;
+            }
+
+            try
+            {
+                // anything better than hardcoded method name and simple reflection?
+                var handleTask = handler.GetType().GetMethod("Handle").Invoke(handler, new object[] {command}) as Task<CliResponse>;
+                return handleTask;
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning($"Handle method not found on handler {handler.GetType().Name}: {e.Unwrap().Message}");
+                completionSource.SetResult(new ErrorResponse($"Problem finding Handle method on registered handler"));
+                return null;
             }
         }
 

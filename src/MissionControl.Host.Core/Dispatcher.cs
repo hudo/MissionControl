@@ -9,13 +9,16 @@ using MissionControl.Host.Core.Utilities;
 
 namespace MissionControl.Host.Core
 {
+    /// <summary>
+    /// Dispatches request to console host. Keeps one console host per terminal window
+    /// </summary>
     internal class Dispatcher : IDispatcher, IDisposable
     {
         private readonly IConHostFactory _conHostFactory;
         private readonly IRequestParser _parser;
         private readonly ILogger<Dispatcher> _logger;
 
-        private static readonly object _lock = new object();
+        private static readonly object Lock = new object();
         private readonly Timer _timer;
         
         private readonly List<ConHostRegistration> _hostsRegistrations = new List<ConHostRegistration>();
@@ -29,29 +32,32 @@ namespace MissionControl.Host.Core
             _timer = new Timer(OnTimerTick, null, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(10));
         }
 
+        /// <summary>
+        /// Cleanup disconnected consoles (no received commands more than 20mins) 
+        /// </summary>
         private void OnTimerTick(object state)
         {
-            lock (_lock) _hostsRegistrations.RemoveAll(r => DateTime.UtcNow.Subtract(r.LastUpdated) > TimeSpan.FromMinutes(20));
+            lock (Lock) _hostsRegistrations.RemoveAll(r => DateTime.UtcNow.Subtract(r.LastUpdated) > TimeSpan.FromMinutes(20));
         }
 
         public async Task<CliResponse> Invoke(Request request)
         {
-            var registration = _hostsRegistrations.FirstOrDefault(x => x.ConHost.ClientId == request.CorrelationId);
+            var registration = _hostsRegistrations.FirstOrDefault(x => x.ConHost.ClientId == request.ClientId);
 
             if (registration == null)
             {
                 registration = new ConHostRegistration
                 {
-                    ConHost = _conHostFactory.Create(request.CorrelationId), 
+                    ConHost = _conHostFactory.Create(request.ClientId), 
                 };
                 
-                lock(_lock) _hostsRegistrations.Add(registration);
-                _logger.LogInformation($"New ConHost created for client {request.CorrelationId}");
+                lock(Lock) _hostsRegistrations.Add(registration);
+                _logger.LogInformation($"New ConHost created for client {request.ClientId}");
             }
 
             try
             {
-                lock (_lock) registration.LastUpdated = DateTime.UtcNow;
+                lock (Lock) registration.LastUpdated = DateTime.UtcNow;
                 
                 var command = _parser.Parse(request);
                 

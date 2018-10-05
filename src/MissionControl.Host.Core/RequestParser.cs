@@ -6,6 +6,9 @@ using MissionControl.Host.Core.Utilities;
 
 namespace MissionControl.Host.Core
 {
+    /// <summary>
+    /// Takes Request with raw data and creates specific command dto
+    /// </summary>
     internal class RequestParser : IRequestParser
     {
         private readonly ILogger<RequestParser> _logger;
@@ -29,7 +32,7 @@ namespace MissionControl.Host.Core
             if (command == null)
                 throw new Exception("Command needs to inherit CliCommand");
 
-            command.CorrelationId = request.CorrelationId;
+            command.CorrelationId = request.ClientId;
 
             ParseArguments(request, type, command);
 
@@ -51,21 +54,7 @@ namespace MissionControl.Host.Core
 
                     if (propertyInfo != null)
                     {
-                        var value = "";
-                        
-                        switch (parts.Length)
-                        {
-                            case 1 when propertyInfo.PropertyType == typeof(bool):
-                                value = "True";
-                                break;
-                            case 1:
-                                value = "";
-                                break;
-                            default:
-                                value = parts[1];
-                                break;
-                        }
-
+                        var value = ExtractValue(parts, propertyInfo);
                         propertyInfo.SetValue(command, Convert.ChangeType(value, propertyInfo.PropertyType), null);
                     }
                     else
@@ -76,6 +65,26 @@ namespace MissionControl.Host.Core
                     _logger.LogError(e, $"Error mapping value {key} to {type.Name}");
                 }
             }
+        }
+
+        private string ExtractValue(string[] parts, PropertyInfo propertyInfo)
+        {
+            var value = "";
+
+            switch (parts.Length)
+            {
+                case 1 when propertyInfo.PropertyType == typeof(bool):
+                    value = "True"; // "cmd -arg" is same as "cmd -arg=True"
+                    break;
+                case 1:
+                    value = "";
+                    break;
+                default:
+                    value = parts[1];
+                    break;
+            }
+
+            return value;
         }
     }
     

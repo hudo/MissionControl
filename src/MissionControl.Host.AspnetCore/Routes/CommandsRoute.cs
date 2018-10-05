@@ -45,7 +45,7 @@ namespace MissionControl.Host.AspnetCore.Routes
             {
                 type,
                 content = cliResponse.Content,
-                commandId = req.CorrelationId
+                commandId = req.ClientId
             })); 
         }
 
@@ -54,7 +54,7 @@ namespace MissionControl.Host.AspnetCore.Routes
             var req = new Request();
 
             // todo: what if clientId is not in header?
-            req.CorrelationId = request.Headers[_idHeader].FirstOrDefault();
+            req.ClientId = request.Headers[_idHeader].FirstOrDefault();
             req.Command = reqUri.Replace("cmd/", "").Trim('/'); // todo: ugly
 
             if (request.Headers.TryGetValue(_argsHeader, out var values))
