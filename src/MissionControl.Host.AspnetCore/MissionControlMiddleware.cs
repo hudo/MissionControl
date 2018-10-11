@@ -67,7 +67,6 @@ namespace MissionControl.Host.AspnetCore
 
                 if (route != null)
                 {
-                   
                     context.Response.StatusCode = 200;
 
                     _logger.LogTrace($"Route [{route.GetType().Name}] matched for request {context.Request.Path}");

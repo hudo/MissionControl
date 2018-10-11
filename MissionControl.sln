@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissionControl.Host.AspnetC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "tests\SampleApp\SampleApp.csproj", "{45625272-ACDA-41B7-A565-43135C1EBA80}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissionControl.Host.AspnetCore.Tests.Integration", "tests\MissionControl.Host.AspnetCore.Tests.Integration\MissionControl.Host.AspnetCore.Tests.Integration.csproj", "{1C90F913-0E99-4A62-95BE-509EF21D3FBD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{45625272-ACDA-41B7-A565-43135C1EBA80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45625272-ACDA-41B7-A565-43135C1EBA80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45625272-ACDA-41B7-A565-43135C1EBA80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C90F913-0E99-4A62-95BE-509EF21D3FBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C90F913-0E99-4A62-95BE-509EF21D3FBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C90F913-0E99-4A62-95BE-509EF21D3FBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C90F913-0E99-4A62-95BE-509EF21D3FBD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -46,6 +52,7 @@ Global
 		{881B0083-859D-48E5-8F46-85E93A8F4664} = {18215C6B-9B4A-46C7-AC52-266D28F710A3}
 		{4E799DFD-2A89-4386-8689-DC1130C0EC78} = {E2B99DDE-5FC4-4D3B-B655-105696783FDB}
 		{45625272-ACDA-41B7-A565-43135C1EBA80} = {18215C6B-9B4A-46C7-AC52-266D28F710A3}
+		{1C90F913-0E99-4A62-95BE-509EF21D3FBD} = {18215C6B-9B4A-46C7-AC52-266D28F710A3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {920B938B-8267-4D0B-BFB1-BCB7DBA8AFB0}
