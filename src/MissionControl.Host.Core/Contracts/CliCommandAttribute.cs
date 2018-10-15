@@ -2,6 +2,7 @@
 
 namespace MissionControl.Host.Core.Contracts
 {
+    [AttributeUsage(AttributeTargets.Class)]
     public class CliCommandAttribute : Attribute
     {
         public CliCommandAttribute(string commandText)

@@ -47,6 +47,7 @@ namespace MissionControl.Host.Core
                 try
                 {
                     // todo: ugly, refactor!
+                    // implement simple tokenizer and parser
                     
                     var parts = arg.Split('=');
                     key = parts[0].TrimStart('-');
