@@ -40,6 +40,8 @@ namespace MissionControl.Host.AspnetCore.Routes
             // very basic rendering, refactor this
 
             var type = cliResponse.GetType().Name.Replace("Response", "").ToLower();
+
+            response.StatusCode = (int)cliResponse.StatusCode;
             
             await response.WriteAsync(JsonConvert.SerializeObject(new
             {

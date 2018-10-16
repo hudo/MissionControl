@@ -9,17 +9,12 @@ using Xunit;
 
 namespace MissionControl.Host.AspnetCore.Tests.Integration
 {
-    public class McEndpointTests : IClassFixture<CustomWebAppFactory>
+    public class McEndpointTests : TestsBase<CustomWebAppFactory>
     {
-        private readonly CustomWebAppFactory _appFactory;
-
-        public McEndpointTests(CustomWebAppFactory appFactory)
+        public McEndpointTests(CustomWebAppFactory appFactory) : base(appFactory)
         {
-            _appFactory = appFactory;
         }
 
-        private HttpClient GetClient() => _appFactory.CreateClient();
-        
         [Fact]
         public async Task Root_returns_success_code()
         {

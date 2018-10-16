@@ -8,14 +8,6 @@ using MissionControl.Host.Core.Contracts;
 
 namespace MissionControl.Host.Core
 {
-    public interface ICommandTypesCatalog
-    {
-        void ScanAssemblies(Assembly[] assemblies, IServiceCollection services);
-
-        (Type type, CliCommandAttribute attributes) GetTypeByCommandName(string name);
-    }
-
-    
     internal class CommandTypesCatalog : ICommandTypesCatalog
     {
         private readonly Dictionary<string, (Type type, CliCommandAttribute attribute)> _commandNames = new Dictionary<string, (Type type, CliCommandAttribute attribute)>();

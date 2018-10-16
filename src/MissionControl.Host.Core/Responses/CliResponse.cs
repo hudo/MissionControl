@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 
 namespace MissionControl.Host.Core.Responses
 {
@@ -6,11 +7,14 @@ namespace MissionControl.Host.Core.Responses
     {
         protected CliResponse()
         {
-            Id = Guid.NewGuid();    
+            Id = Guid.NewGuid();
+            StatusCode = HttpStatusCode.OK;
         }
         
         public Guid Id { get; }
 
         public string Content { get; set; }
+
+        public HttpStatusCode StatusCode { get; set; }
     }
 }
