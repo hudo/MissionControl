@@ -17,6 +17,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "tests\SampleAp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissionControl.Host.AspnetCore.Tests.Integration", "tests\MissionControl.Host.AspnetCore.Tests.Integration\MissionControl.Host.AspnetCore.Tests.Integration.csproj", "{1C90F913-0E99-4A62-95BE-509EF21D3FBD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{5D09B453-683E-4A82-BBB2-3F8068F1AB70}"
+ProjectSection(SolutionItems) = preProject
+	README.md = README.md
+	azure-pipelines.yml = azure-pipelines.yml
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

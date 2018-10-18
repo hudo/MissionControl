@@ -1,7 +1,7 @@
-﻿namespace MissionControl.Host.Core.Contracts
+﻿namespace MissionControl.Host.Core.Contracts.StandardCommands
 {
     [CliCommand("ping")]
-    public class PingCommand : CliCommand
+    internal class PingCommand : CliCommand
     {
         [CliArg(required: true, help: "Say your name")]
         public string Name { get; set; }

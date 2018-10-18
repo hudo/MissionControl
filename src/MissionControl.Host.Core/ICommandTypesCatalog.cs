@@ -10,5 +10,7 @@ namespace MissionControl.Host.Core
         void ScanAssemblies(Assembly[] assemblies, IServiceCollection services);
 
         (Type type, CliCommandAttribute attributes) GetTypeByCommandName(string name);
+
+        string[] RegisteredCommands { get; }
     }
 }

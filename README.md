@@ -22,27 +22,33 @@ MissionControl acts as a CLI UI Terminal, proxying commands to handlers built by
 
 ![Diagram](docs/diagram1.png "High level diagram")  
 
-- serves CLI interface on dedicated URL (/mc by default)
-- scans and invokes handlers
-- proxy output back to console
+- just a middleware for any .NET Core app
+- serves CLI UI interface on dedicated URL (/mc by default)
+- automatically registers all commands/handlers in the app
 
 ## Technologies
 
-.NET Standard 2.0
+.NET Standard 2.0 / Core 2.0
 
 # State of development
 
-- [ ] basic data structure and model of DTO commands and handlers
+- [x] basic data structure and model of DTO commands and handlers
 - [x] ASP.NET Core middleware (custom URL and auth callback) 
-- [ ] Basic routing of web requests to internal action
+- [x] Basic routing of web requests to internal action
 - [x] Route: default HTML 
 - [x] Route: static content
-- [ ] Route: CLI requests
-- [ ] Command/handlers scanning
-- [ ] Invoke of requested commnad handler
+- [x] Route: CLI requests
+- [x] Command/handlers scanning
+- [x] Invoke of requested commnad handler
 - [ ] UI CSS standards
 - [ ] JS: UI layout and structure
 - [ ] JS: input parsing
 - [ ] JS: ajax proxy
 - [ ] JS: response rendering
+- [ ] JS: unit tests
 - [ ] cluster epic (control many services from one console)
+- [ ] Refactor: argument parser (implement tokenizer)
+- [ ] Refactor: better command/handler contracts for easier/streamlined development
+- [ ] Included commands: ping, list-commands, command help
+- [ ] DevOps: build pipeline
+- [ ] DevOps: sample site deployment pipeline

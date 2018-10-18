@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using MissionControl.Host.Core;
 using MissionControl.Host.Core.Contracts;
+using MissionControl.Host.Core.Contracts.StandardCommands;
 
 namespace MissionControl.Host.AspnetCore
 {

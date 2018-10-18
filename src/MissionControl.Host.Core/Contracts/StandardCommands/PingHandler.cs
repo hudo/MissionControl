@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using MissionControl.Host.Core.Responses;
 
-namespace MissionControl.Host.Core.Contracts
+namespace MissionControl.Host.Core.Contracts.StandardCommands
 {
     internal class PingHandler : ICliCommandHandler<PingCommand>
     {

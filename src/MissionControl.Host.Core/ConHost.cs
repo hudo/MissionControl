@@ -108,12 +108,4 @@ namespace MissionControl.Host.Core
             _inbox.Dispose();
         }
     }
-
-    public interface IConHost
-    {
-        string ClientId { get; }
-        Task<CliResponse> Execute(CliCommand command);
-    }
-
-    
 }

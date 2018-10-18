@@ -15,11 +15,7 @@ namespace MissionControl.Host.AspnetCore.Tests.Integration
         [Fact]
         public async Task Standard_hello_world_command()
         {
-            var client = GetClient();
-            var content = new StringContent("");
-            content.Headers.Add("mc.args", "name=batman");
-            
-            var response = await client.PostAsync("/mc/cmd/ping", content);
+            var response = await Post("/mc/cmd/ping", "name=batman");
 
             response.EnsureSuccessStatusCode();
 
@@ -28,6 +24,16 @@ namespace MissionControl.Host.AspnetCore.Tests.Integration
             var textResponse = JsonConvert.DeserializeObject<TextResponse>(body);
             textResponse.ShouldNotBeNull();
             textResponse.Content.ShouldContain("batman");
+        }
+
+        [Fact]
+        public async Task List_commands_command()
+        {
+            var response = await Post("/mc/cmd/list-commands");
+
+            response.EnsureSuccessStatusCode();
+
+            var body = await response.Content.ReadAsStringAsync();
         }
     }
 }

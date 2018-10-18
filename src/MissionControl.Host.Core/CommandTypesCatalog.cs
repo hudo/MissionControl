@@ -52,17 +52,17 @@ namespace MissionControl.Host.Core
         {
             var handler = typeof(ICliCommandHandler<>);
 
-            var types =
+            var handlerTypes =
                 from ass in assemblies
                 from type in ass.GetTypes()
                 from i in type.GetInterfaces()
                 where i.IsGenericType && handler.IsAssignableFrom(i.GetGenericTypeDefinition())
                 select type;
 
-            foreach (var type in types)
+            foreach (var handlerType in handlerTypes)
             {
-                var interfaces = type.GetInterfaces().FirstOrDefault();
-                services.AddTransient(interfaces, type);
+                var handlerInterface = handlerType.GetInterfaces().FirstOrDefault();
+                services.AddTransient(handlerInterface, handlerType);
             }
         }
 
@@ -76,5 +76,7 @@ namespace MissionControl.Host.Core
 
             return (null, null); // any better way of returning nullable tuple? 
         }
+
+        public string[] RegisteredCommands => _commandNames.Select(x => x.Key).ToArray();
     }
 }

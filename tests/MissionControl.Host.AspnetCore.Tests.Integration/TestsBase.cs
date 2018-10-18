@@ -1,6 +1,8 @@
 using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using MissionControl.Host.AspnetCore.Tests.Integration.Infrastructure;
+using MissionControl.Host.Core.Contracts;
 using Xunit;
 
 namespace MissionControl.Host.AspnetCore.Tests.Integration
@@ -15,5 +17,13 @@ namespace MissionControl.Host.AspnetCore.Tests.Integration
         }
         
         protected HttpClient GetClient() => Factory.CreateClient();
+
+        protected async Task<HttpResponseMessage> Post(string url, string args = "")
+        {
+            var client = GetClient();
+            var content = new StringContent("");
+            content.Headers.Add("mc.args", args);
+            return await client.PostAsync(url, content);
+        }
     }
 }
