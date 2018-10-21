@@ -22,19 +22,19 @@ namespace MissionControl.Host.Core
 
         public Maybe<CliCommand> Parse(Request request)
         {
-            var (type, attribs) = _catalog.GetTypeByCommandName(request.Command);
+            var registration = _catalog.FindCommandByName(request.Command);
 
-            if (type == null)
+            if (registration.IsNull)
                 throw new ArgumentException($"Command '{request.Command}' not found.");
 
-            var command = Activator.CreateInstance(type) as CliCommand;
+            var command = Activator.CreateInstance(registration.Value.Type) as CliCommand;
 
             if (command == null)
                 throw new Exception("Command needs to inherit CliCommand");
 
             command.CorrelationId = request.ClientId;
 
-            ParseArguments(request, type, command);
+            ParseArguments(request, registration.Value.Type, command);
 
             return command;
         }

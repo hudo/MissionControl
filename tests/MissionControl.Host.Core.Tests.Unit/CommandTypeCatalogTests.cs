@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using MissionControl.Host.Core.Contracts;
 using Moq;
 using Shouldly;
@@ -22,9 +21,10 @@ namespace MissionControl.Host.Core.Tests.Unit
         {
             _catalog.ScanAssemblies(new[] {this.GetType().Assembly}, _servicesMock.Object);
             
-            var (type, _) = _catalog.GetTypeByCommandName("foo");
+            var command = _catalog.FindCommandByName("foo");
             
-            type.ShouldBe(typeof(FooCommand));
+            command.IsSome.ShouldBeTrue();
+            command.Value.Type.ShouldBe(typeof(FooCommand));
         }
 
         [Fact]
@@ -32,9 +32,9 @@ namespace MissionControl.Host.Core.Tests.Unit
         {
             _catalog.ScanAssemblies(new []{ GetType().Assembly}, _servicesMock.Object);
 
-            var (type, _) = _catalog.GetTypeByCommandName("foobar");
+            var command = _catalog.FindCommandByName("foobar");
 
-            type.ShouldBeNull();
+            command.IsNull.ShouldBeTrue();
         }
 
         [CliCommand("foo")]

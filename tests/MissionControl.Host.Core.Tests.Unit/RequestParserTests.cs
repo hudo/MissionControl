@@ -15,9 +15,12 @@ namespace MissionControl.Host.Core.Tests.Unit
         public RequestParserTests()
         {
             _typeCatalogMock
-                .Setup(x => x.GetTypeByCommandName(It.Is<string>(name => name == "test")))
-                .Returns((typeof(TestCommand), new CliCommandAttribute("test")));
-            
+                .Setup(x => x.RegisteredCommands)
+                .Returns(new[]
+                {
+                    new CommandRegistration {Name = "test", Type = typeof(TestCommand), Attribute = new CliCommandAttribute("test")}
+                });
+                
             _requestParser = new RequestParser(_typeCatalogMock.Object, Mock.Of<ILogger<RequestParser>>());
         }
 
