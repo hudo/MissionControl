@@ -11,17 +11,17 @@ namespace MissionControl.Host.Core
     internal class ConHostFactory : IConHostFactory
     {
         private readonly ILogger<ConHost> _logger;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ServiceFactory _serviceFactory;
 
-        public ConHostFactory(ILogger<ConHost> logger, IServiceProvider serviceProvider)
+        public ConHostFactory(ILogger<ConHost> logger, ServiceFactory serviceFactory)
         {
             _logger = logger;
-            _serviceProvider = serviceProvider;
+            _serviceFactory = serviceFactory;
         }
 
         public IConHost Create(string clientId)
         {
-            return new ConHost(clientId, _serviceProvider, _logger);
+            return new ConHost(clientId, _serviceFactory, _logger);
         }
     }
 }

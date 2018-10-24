@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using MissionControl.Host.Core.Contracts;
+using MissionControl.Host.Core.Contracts.Pipeline;
 using MissionControl.Host.Core.Utilities;
 
 namespace MissionControl.Host.Core
@@ -55,9 +56,10 @@ namespace MissionControl.Host.Core
             var handler = typeof(ICliCommandHandler<>);
 
             services.Scan(x => x.FromAssemblies(assemblies)
-                .AddClasses(cls => cls.AssignableTo(handler))
-                .AsImplementedInterfaces()
-                .WithTransientLifetime());
+                .AddClasses(cls => cls.AssignableTo(handler)).AsImplementedInterfaces()
+                .AddClasses(cls => cls.AssignableTo(typeof(IPipelineBehavior<>))).AsImplementedInterfaces()
+                .AddClasses(cls => cls.AssignableTo(typeof(IPipelinePreBehavior<>))).AsImplementedInterfaces()
+                .AddClasses(cls => cls.AssignableTo(typeof(IPipelinePostBehavior<>))).AsImplementedInterfaces());
         }
     }
 

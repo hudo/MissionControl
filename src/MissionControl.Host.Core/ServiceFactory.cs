@@ -7,8 +7,8 @@ namespace MissionControl.Host.Core
 
     internal static class ServiceFactoryExtensions
     {
-        public static T GetInstance<T>(this ServiceFactory factory, Type type) => (T) factory(type);
+        public static T GetInstance<T>(this ServiceFactory factory) => (T) factory(typeof(T));
 
-        public static IEnumerable<T> GetIntances<T>(this ServiceFactory factory, Type type) => (IEnumerable<T>) factory(typeof(IEnumerable<T>));
+        public static IEnumerable<T> GetInstances<T>(this ServiceFactory factory) => (IEnumerable<T>) factory(typeof(IEnumerable<T>));
     }
 }

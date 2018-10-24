@@ -15,15 +15,15 @@ namespace MissionControl.Host.Core
     /// </summary>
     public class ConHost : IConHost, IDisposable
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ServiceFactory _serviceFactory;
         private readonly ILogger<ConHost> _logger;
 
         private readonly BlockingCollection<(CliCommand command, TaskCompletionSource<CliResponse> completionSource)> _inbox  
             = new BlockingCollection<(CliCommand, TaskCompletionSource<CliResponse>)>();
 
-        public ConHost(string clientId, IServiceProvider serviceProvider, ILogger<ConHost> logger)
+        public ConHost(string clientId, ServiceFactory serviceFactory, ILogger<ConHost> logger)
         {
-            _serviceProvider = serviceProvider;
+            _serviceFactory = serviceFactory;
             _logger = logger;
             ClientId = clientId;
             
@@ -65,7 +65,7 @@ namespace MissionControl.Host.Core
         private Task<CliResponse> ResolveHandler(CliCommand command, TaskCompletionSource<CliResponse> completionSource, string cmdName)
         {
             var handlerType = typeof(ICliCommandHandler<>).MakeGenericType(command.GetType());
-            var handler = _serviceProvider.GetService(handlerType);
+            var handler = _serviceFactory(handlerType);
 
             if (handler == null)
             {

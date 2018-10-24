@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MissionControl.Host.Core.Contracts
+﻿namespace MissionControl.Host.Core.Contracts
 {
     public abstract class CliCommand
     {
