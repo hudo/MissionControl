@@ -28,6 +28,8 @@ namespace MissionControl.Host.Core
         // todo: how to handle history in clusters?
         private readonly List<CliCommand> _history = new List<CliCommand>();
 
+        public string ClientId { get;  }
+
         public ConHost(string clientId, ServiceFactory serviceFactory, ILogger<ConHost> logger)
         {
             _serviceFactory = Guard.NotNull(serviceFactory, nameof(serviceFactory));
@@ -37,7 +39,19 @@ namespace MissionControl.Host.Core
             Task.Run(ProcessInbox);
         }
 
-        public string ClientId { get;  }
+        public Task<CliResponse> Execute(CliCommand command)
+        { 
+            if (_inbox.IsAddingCompleted)
+                throw new ApplicationException("ConHost stopped"); 
+            
+            var completionSource = new TaskCompletionSource<CliResponse>();
+            
+            _inbox.Add((command, completionSource));
+            
+            _logger.LogDebug($"Command [{command.GetType().Name}] scheduled for processing: {JsonConvert.SerializeObject(command)}");
+            
+            return completionSource.Task;
+        }
 
         private async Task ProcessInbox()
         {
@@ -117,20 +131,6 @@ namespace MissionControl.Host.Core
             return _serviceFactory.GetInstances<IPipelineBehavior<T>>()
                 .Reverse()
                 .Aggregate(handlerDelegate, (next, pipeline) => () => pipeline.Process(command, next))();
-        }
-
-        public Task<CliResponse> Execute(CliCommand command)
-        { 
-            if (_inbox.IsAddingCompleted)
-                throw new ApplicationException("ConHost stopped"); 
-            
-            var completionSource = new TaskCompletionSource<CliResponse>();
-            
-            _inbox.Add((command, completionSource));
-            
-            _logger.LogDebug($"Command [{command.GetType().Name}] scheduled for processing: {JsonConvert.SerializeObject(command)}");
-            
-            return completionSource.Task;
         }
 
         public void Dispose()
