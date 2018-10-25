@@ -40,15 +40,18 @@ MissionControl acts as a CLI UI Terminal, proxying commands to handlers built by
 - [x] Route: CLI requests
 - [x] Command/handlers scanning
 - [x] Invoke of requested commnad handler
+- [x] Handler pre/post pipeline behavior
+- [ ] Args: help (done), skip (done), required
 - [ ] UI CSS standards
 - [ ] JS: UI layout and structure
 - [ ] JS: input parsing
 - [ ] JS: ajax proxy
-- [ ] JS: response rendering
+- [ ] JS: response rendering (text, warnings, errors)
+- [ ] JS: get previous command (history)
 - [ ] JS: unit tests
 - [ ] cluster epic (control many services from one console)
 - [ ] Refactor: argument parser (implement tokenizer)
 - [ ] Refactor: better command/handler contracts for easier/streamlined development
-- [ ] Included commands: ping, list-commands, command help
+- [x] Included commands: ping, list-commands, command help
 - [ ] DevOps: build pipeline
 - [ ] DevOps: sample site deployment pipeline
