@@ -9,8 +9,8 @@ namespace MissionControl.Host.Core.Tests.Unit
 {
     public class RequestParserTests
     {
-        private Mock<ICommandTypesCatalog> _typeCatalogMock = new Mock<ICommandTypesCatalog>();
-        private RequestParser _requestParser;
+        private readonly Mock<ICommandTypesCatalog> _typeCatalogMock = new Mock<ICommandTypesCatalog>();
+        private readonly RequestParser _requestParser;
 
         public RequestParserTests()
         {
@@ -92,6 +92,18 @@ namespace MissionControl.Host.Core.Tests.Unit
 
             var testCommand = command.Value as TestCommand;
             testCommand.Prop4.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Skip_CorrelationId_args()
+        {
+            var command = _requestParser.Parse(new Request
+            {
+                Command = "test",
+                Args = new[] { "-CorrelationId=123" }
+            });
+
+            command.Value.CorrelationId.ShouldBeNullOrEmpty();
         }
 
         private class TestCommand : CliCommand

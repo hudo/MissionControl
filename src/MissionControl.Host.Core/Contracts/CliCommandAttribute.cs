@@ -5,14 +5,19 @@ namespace MissionControl.Host.Core.Contracts
     [AttributeUsage(AttributeTargets.Class)]
     public class CliCommandAttribute : Attribute
     {
-        public CliCommandAttribute(string commandText, string description = "")
+        /// <summary>
+        /// Represents CLI command
+        /// </summary>
+        /// <param name="commandText">Name used to invoke this command</param>
+        /// <param name="help">Description of command</param>
+        public CliCommandAttribute(string commandText, string help = "")
         {
             CommandText = commandText;
-            Description = description;
+            Help = help;
         }
         
         public string CommandText { get; }
 
-        public string Description { get; }
+        public string Help { get; }
     }
 }

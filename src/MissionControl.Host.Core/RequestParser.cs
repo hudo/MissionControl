@@ -55,7 +55,13 @@ namespace MissionControl.Host.Core
 
                     if (propertyInfo != null)
                     {
+                        var attribute = propertyInfo.GetCustomAttribute<CliArgAttribute>();
+
+                        if (attribute?.Skip == true)
+                            continue;
+
                         var value = ExtractValue(parts, propertyInfo);
+
                         propertyInfo.SetValue(command, Convert.ChangeType(value, propertyInfo.PropertyType), null);
                     }
                     else
@@ -87,11 +93,5 @@ namespace MissionControl.Host.Core
 
             return value;
         }
-    }
-    
-    // deserialize request to DTO props
-    internal interface IRequestParser
-    {
-        Maybe<CliCommand> Parse(Request request);
     }
 }

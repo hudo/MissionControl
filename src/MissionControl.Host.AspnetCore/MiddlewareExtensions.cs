@@ -4,7 +4,6 @@ using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using MissionControl.Host.Core;
-using MissionControl.Host.Core.Contracts;
 using MissionControl.Host.Core.Contracts.StandardCommands;
 
 namespace MissionControl.Host.AspnetCore
@@ -28,7 +27,7 @@ namespace MissionControl.Host.AspnetCore
         /// <param name="assemblies">Assemblies containing commands and handlers</param>
         public static void AddMissionControl(this IServiceCollection services, params Assembly[] assemblies)
         {
-            var internalAssembly = new[] {typeof(PingCommand).Assembly};
+            var internalAssembly = new[] {typeof(ListCommandsCommand).Assembly};
             
             _assemblies = (assemblies.Length > 0 
                     ? assemblies 

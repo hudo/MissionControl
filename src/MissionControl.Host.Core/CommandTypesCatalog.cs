@@ -53,10 +53,10 @@ namespace MissionControl.Host.Core
 
         private void RegisterHandlers(IServiceCollection services, Assembly[] assemblies)
         {
-            var handler = typeof(ICliCommandHandler<>);
+            // move outside
 
             services.Scan(x => x.FromAssemblies(assemblies)
-                .AddClasses(cls => cls.AssignableTo(handler)).AsImplementedInterfaces()
+                .AddClasses(cls => cls.AssignableTo(typeof(ICliCommandHandler<>))).AsImplementedInterfaces()
                 .AddClasses(cls => cls.AssignableTo(typeof(IPipelineBehavior<>))).AsImplementedInterfaces()
                 .AddClasses(cls => cls.AssignableTo(typeof(IPipelinePreBehavior<>))).AsImplementedInterfaces()
                 .AddClasses(cls => cls.AssignableTo(typeof(IPipelinePostBehavior<>))).AsImplementedInterfaces());

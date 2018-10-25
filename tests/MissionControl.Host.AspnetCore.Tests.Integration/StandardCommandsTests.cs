@@ -1,8 +1,7 @@
-using System.Net.Http;
+using System;
 using System.Threading.Tasks;
 using MissionControl.Host.AspnetCore.Tests.Integration.Infrastructure;
 using MissionControl.Host.Core.Responses;
-using Newtonsoft.Json;
 using Shouldly;
 using Xunit;
 
@@ -15,25 +14,34 @@ namespace MissionControl.Host.AspnetCore.Tests.Integration
         [Fact]
         public async Task Standard_hello_world_command()
         {
-            var response = await Post("/mc/cmd/ping", "name=batman");
+            var response = await Post<TextResponse>("/mc/cmd/ping", "name=batman");
 
-            response.EnsureSuccessStatusCode();
+            response.HttpResponse.EnsureSuccessStatusCode();
 
-            var body = await response.Content.ReadAsStringAsync();
-
-            var textResponse = JsonConvert.DeserializeObject<TextResponse>(body);
-            textResponse.ShouldNotBeNull();
-            textResponse.Content.ShouldContain("batman");
+            response.Item.ShouldNotBeNull();
+            response.Item.Content.ShouldContain("batman");
         }
 
         [Fact]
         public async Task List_commands_command()
         {
-            var response = await Post("/mc/cmd/list-commands");
+            var response = await Post<TextResponse>("/mc/cmd/list-commands");
 
-            response.EnsureSuccessStatusCode();
+            response.HttpResponse.EnsureSuccessStatusCode();
 
-            var body = await response.Content.ReadAsStringAsync();
+            response.Item.Content.StartsWith("Registered commands", StringComparison.OrdinalIgnoreCase).ShouldBeTrue();
+            response.Item.Content.Contains("list-commands", StringComparison.OrdinalIgnoreCase).ShouldBeTrue();
+        }
+
+        [Fact]
+        public async Task Help_arg_returns_command_description()
+        {
+            var response = await Post<TextResponse>("/mc/cmd/ping", "help");
+
+            response.HttpResponse.EnsureSuccessStatusCode();
+
+            response.Item.Content.StartsWith("Description of command").ShouldBeTrue();
+            response.Item.Content.Contains("CorrelationId", StringComparison.OrdinalIgnoreCase).ShouldBeFalse();
         }
     }
 }

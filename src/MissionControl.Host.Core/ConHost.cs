@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MissionControl.Host.Core.Contracts;
+using MissionControl.Host.Core.Contracts.Pipeline;
 using MissionControl.Host.Core.Responses;
 using MissionControl.Host.Core.Utilities;
 using Newtonsoft.Json;
@@ -21,10 +25,13 @@ namespace MissionControl.Host.Core
         private readonly BlockingCollection<(CliCommand command, TaskCompletionSource<CliResponse> completionSource)> _inbox  
             = new BlockingCollection<(CliCommand, TaskCompletionSource<CliResponse>)>();
 
+        // todo: how to handle history in clusters?
+        private readonly List<CliCommand> _history = new List<CliCommand>();
+
         public ConHost(string clientId, ServiceFactory serviceFactory, ILogger<ConHost> logger)
         {
-            _serviceFactory = serviceFactory;
-            _logger = logger;
+            _serviceFactory = Guard.NotNull(serviceFactory, nameof(serviceFactory));
+            _logger = Guard.NotNull(logger, nameof(logger));
             ClientId = clientId;
             
             Task.Run(ProcessInbox);
@@ -35,14 +42,14 @@ namespace MissionControl.Host.Core
         private async Task ProcessInbox()
         {
             _logger.LogDebug("Started processing ConHost commands");
-            foreach (var command in _inbox.GetConsumingEnumerable())
+            foreach (var item in _inbox.GetConsumingEnumerable())
             {
-                var cmdName = command.command.GetType().Name;
+                var cmdName = item.command.GetType().Name;
                 try
                 {
                     var stopwatch = Stopwatch.StartNew();
 
-                    var handleTask = ResolveHandler(command.command, command.completionSource, cmdName);
+                    var handleTask = ResolveHandler(item.command, item.completionSource, cmdName);
                     
                     if (handleTask == null) continue;
                     
@@ -51,21 +58,32 @@ namespace MissionControl.Host.Core
                     stopwatch.Stop();
                     _logger.LogInformation($"Command [{cmdName}] executed in {stopwatch.ElapsedMilliseconds}ms");
                     
-                    command.completionSource.SetResult(response);                    
+                    item.completionSource.SetResult(response);
+                    
+                    Record(item.command);
                 }
                 catch (Exception e)
                 {
                     _logger.LogError(e, $"Error executing command [{cmdName}]: {e.Unwrap().Message}");
                     
-                    command.completionSource.SetResult(new ErrorResponse(e.Unwrap().Message));
+                    item.completionSource.SetResult(new ErrorResponse(e.Unwrap().Message));
                 }
+            }
+        }
+
+        private void Record(CliCommand command)
+        {
+            _history.Add(command);
+
+            if (_history.Count > 100)
+            {
+                _history.RemoveAt(0);
             }
         }
 
         private Task<CliResponse> ResolveHandler(CliCommand command, TaskCompletionSource<CliResponse> completionSource, string cmdName)
         {
-            var handlerType = typeof(ICliCommandHandler<>).MakeGenericType(command.GetType());
-            var handler = _serviceFactory(handlerType);
+            var handler = _serviceFactory(typeof(ICliCommandHandler<>).MakeGenericType(command.GetType()));
 
             if (handler == null)
             {
@@ -76,16 +94,29 @@ namespace MissionControl.Host.Core
 
             try
             {
-                // anything better than hardcoded method name and simple reflection?
-                var handleTask = handler.GetType().GetMethod("Handle").Invoke(handler, new object[] {command}) as Task<CliResponse>;
-                return handleTask;
+                var pipelineTask = (Task<CliResponse>)this.GetType()
+                    .GetMethod(nameof(ComposePipeline), BindingFlags.NonPublic | BindingFlags.Instance)
+                    .MakeGenericMethod(command.GetType())
+                    .Invoke(this, new[] { command });
+
+                return pipelineTask;
             }
             catch (Exception e)
             {
-                _logger.LogWarning($"Handle method not found on handler {handler.GetType().Name}: {e.Unwrap().Message}");
-                completionSource.SetResult(new ErrorResponse($"Problem finding Handle method on registered handler"));
+                var message = e.Unwrap().Message;
+                _logger.LogError($"Error composing pipeline: {message}");
+                completionSource.SetResult(new ErrorResponse($"Internal error: {message}"));
                 return null;
             }
+        }
+
+        private Task<CliResponse> ComposePipeline<T>(T command) where  T : CliCommand
+        {
+            CliHandlerDelegate handlerDelegate = () => _serviceFactory.GetInstance<ICliCommandHandler<T>>().Handle(command);
+
+            return _serviceFactory.GetInstances<IPipelineBehavior<T>>()
+                .Reverse()
+                .Aggregate(handlerDelegate, (next, pipeline) => () => pipeline.Process(command, next))();
         }
 
         public Task<CliResponse> Execute(CliCommand command)
@@ -104,6 +135,7 @@ namespace MissionControl.Host.Core
 
         public void Dispose()
         {
+            _history.Clear();
             _inbox.CompleteAdding();
             _inbox.Dispose();
         }

@@ -2,6 +2,7 @@
 {
     public abstract class CliCommand
     {
+        [CliArg(skip: true)]
         public string CorrelationId { get; set; }
 
         /// <summary>
