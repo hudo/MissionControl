@@ -19,7 +19,7 @@ namespace MissionControl.Host.Core.Tests.Unit
         [Fact]
         public void Scan_and_find_known_command()
         {
-            _catalog.ScanAssemblies(new[] {this.GetType().Assembly}, _servicesMock.Object);
+            _catalog.DiscoverCommands(new[] {this.GetType().Assembly});
             
             var command = _catalog.FindCommandByName("foo");
             
@@ -30,7 +30,7 @@ namespace MissionControl.Host.Core.Tests.Unit
         [Fact]
         public void Unknown_command_name_returns_null()
         {
-            _catalog.ScanAssemblies(new []{ GetType().Assembly}, _servicesMock.Object);
+            _catalog.DiscoverCommands(new []{ GetType().Assembly});
 
             var command = _catalog.FindCommandByName("foobar");
 

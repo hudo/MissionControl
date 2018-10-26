@@ -1,11 +1,10 @@
 ﻿using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace MissionControl.Host.Core
 {
     public interface ICommandTypesCatalog
     {
-        void ScanAssemblies(Assembly[] assemblies, IServiceCollection services);
+        void DiscoverCommands(Assembly[] assemblies);
 
         CommandRegistration[] RegisteredCommands { get; }
     }

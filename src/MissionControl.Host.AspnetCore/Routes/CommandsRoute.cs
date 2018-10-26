@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using MissionControl.Host.Core;
@@ -12,9 +14,11 @@ namespace MissionControl.Host.AspnetCore.Routes
     /// </summary>
     public class CommandsRoute : Route
     {
+        private const string IdHeader = "mc.id";
+        private const string ArgsHeader = "mc.args";
+        private const string CmdUrlPrefix = "cmd/";
+
         private readonly IDispatcher _dispatcher;
-        private static string _idHeader = "mc.id";
-        private static string _argsHeader = "mc.args"; 
         
         public CommandsRoute(IDispatcher dispatcher) : base("")
         {
@@ -23,7 +27,7 @@ namespace MissionControl.Host.AspnetCore.Routes
 
         public override bool Match(string reqUri, string method)
         {
-            return reqUri.StartsWith("cmd/"); //&& method == "post";
+            return reqUri.StartsWith(CmdUrlPrefix) && method.Equals("post", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -33,17 +37,23 @@ namespace MissionControl.Host.AspnetCore.Routes
         /// </summary>
         public override async Task Handle(string reqUri, HttpRequest request, HttpResponse response)
         {
+            var validationResult = ValidateRequest(request);
+            if (!validationResult.isValid)
+            {
+                response.StatusCode = 417;
+                await response.WriteAsync(Json(validationResult.errors));
+                return;
+            }
+            
             var req = BuildRequest(reqUri, request);
 
             var cliResponse = await _dispatcher.Invoke(req);
             
             // very basic rendering, refactor this
-
             var type = cliResponse.GetType().Name.Replace("Response", "").ToLower();
-
             response.StatusCode = (int)cliResponse.StatusCode;
             
-            await response.WriteAsync(JsonConvert.SerializeObject(new
+            await response.WriteAsync(Json(new
             {
                 type,
                 content = cliResponse.Content,
@@ -56,15 +66,42 @@ namespace MissionControl.Host.AspnetCore.Routes
             var req = new Request();
 
             // todo: what if clientId is not in header?
-            req.ClientId = request.Headers[_idHeader].FirstOrDefault();
-            req.Command = reqUri.Replace("cmd/", "").Trim('/'); // todo: ugly
+            req.ClientId = request.Headers[IdHeader].FirstOrDefault();
+            req.Command = reqUri.Replace(CmdUrlPrefix, "").Trim('/'); // todo: ugly
 
-            if (request.Headers.TryGetValue(_argsHeader, out var values))
+            if (request.Headers.TryGetValue(ArgsHeader, out var values))
             {
                 req.Args = values[0].Split(';');
             }
 
             return req;
         }
+
+        private static readonly Regex CommandNameValidator = new Regex("(.*)(/cmd/)([a-z-_]{1,50})$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        
+        private (bool isValid, List<string> errors) ValidateRequest(HttpRequest request)
+        {
+            var errors = new List<string>();
+
+            if (!request.Headers.ContainsKey(IdHeader))
+            {
+                errors.Add("'mc.id' console window identifier missing");
+            }
+
+            if (!CommandNameValidator.IsMatch(request.Path.ToString()))
+            {
+                errors.Add($"Error parsing command name: {request.Path.ToString()}");
+            }
+            
+            return (!errors.Any(), errors);
+        }
+
+        private static string Json(object obj) => JsonConvert.SerializeObject(obj, JsonSettings);
+        
+        private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            Formatting = Formatting.Indented,
+        };
     }
 }

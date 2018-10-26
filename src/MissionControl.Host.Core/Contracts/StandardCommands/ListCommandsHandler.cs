@@ -22,7 +22,7 @@ namespace MissionControl.Host.Core.Contracts.StandardCommands
         
         public Task<CliResponse> Handle(ListCommandsCommand command)
         {
-            var response = $"Registered commands:\n{string.Join("\n", _catalog.RegisteredCommands.Select(x => x.Name))}"; 
+            var response = $"Registered commands:\n{string.Join("\n", _catalog.RegisteredCommands.Where(x => x.Attribute.Visible).Select(x => x.Name))}"; 
             return Task.FromResult<CliResponse>(new TextResponse(response));
         }
     }

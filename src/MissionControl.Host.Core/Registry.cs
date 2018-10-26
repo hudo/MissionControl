@@ -1,5 +1,7 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using MissionControl.Host.Core.Contracts;
+using MissionControl.Host.Core.Contracts.Pipeline;
 
 namespace MissionControl.Host.Core
 {
@@ -17,7 +19,13 @@ namespace MissionControl.Host.Core
 
             services.AddSingleton<ICommandTypesCatalog, CommandTypesCatalog>(_ => catalog);
             
-            catalog.ScanAssemblies(assemblies, services);
+            catalog.DiscoverCommands(assemblies);
+            
+            services.Scan(x => x.FromAssemblies(assemblies)
+                .AddClasses(cls => cls.AssignableTo(typeof(ICliCommandHandler<>))).AsImplementedInterfaces()
+                .AddClasses(cls => cls.AssignableTo(typeof(IPipelineBehavior<>))).AsImplementedInterfaces()
+                .AddClasses(cls => cls.AssignableTo(typeof(IPipelinePreBehavior<>))).AsImplementedInterfaces()
+                .AddClasses(cls => cls.AssignableTo(typeof(IPipelinePostBehavior<>))).AsImplementedInterfaces());
         }
     }
 }

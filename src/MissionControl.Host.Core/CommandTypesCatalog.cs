@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
 using MissionControl.Host.Core.Contracts;
-using MissionControl.Host.Core.Contracts.Pipeline;
 using MissionControl.Host.Core.Utilities;
 
 namespace MissionControl.Host.Core
@@ -14,20 +12,10 @@ namespace MissionControl.Host.Core
     {
         public CommandRegistration[] RegisteredCommands { get; private set; }
 
-        public void ScanAssemblies(Assembly[] assemblies, IServiceCollection services)
+        public void DiscoverCommands(Assembly[] assemblies)
         {
             var stopwatch = Stopwatch.StartNew();
 
-            DiscoverCommands(assemblies);
-
-            RegisterHandlers(services, assemblies);
-
-            stopwatch.Stop();
-            Console.WriteLine($"Assembly scanning done in {stopwatch.ElapsedMilliseconds}ms");
-        }
-
-        private void DiscoverCommands(Assembly[] assemblies)
-        {
             var registrations = new List<CommandRegistration>();
 
             var baseCommandType = typeof(CliCommand);
@@ -47,19 +35,11 @@ namespace MissionControl.Host.Core
             }
 
             RegisteredCommands = registrations.ToArray();
-
+            
+            stopwatch.Stop();
+            
             Console.WriteLine($"Discovered {registrations.Count} CLI commands in assemblies {string.Join(", ", assemblies.Select(x => x.GetName().Name))}");
-        }
-
-        private void RegisterHandlers(IServiceCollection services, Assembly[] assemblies)
-        {
-            // move outside
-
-            services.Scan(x => x.FromAssemblies(assemblies)
-                .AddClasses(cls => cls.AssignableTo(typeof(ICliCommandHandler<>))).AsImplementedInterfaces()
-                .AddClasses(cls => cls.AssignableTo(typeof(IPipelineBehavior<>))).AsImplementedInterfaces()
-                .AddClasses(cls => cls.AssignableTo(typeof(IPipelinePreBehavior<>))).AsImplementedInterfaces()
-                .AddClasses(cls => cls.AssignableTo(typeof(IPipelinePostBehavior<>))).AsImplementedInterfaces());
+            Console.WriteLine($"Assembly scanning done in {stopwatch.ElapsedMilliseconds}ms");
         }
     }
 

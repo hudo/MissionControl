@@ -1,3 +1,4 @@
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -19,11 +20,15 @@ namespace MissionControl.Host.AspnetCore.Tests.Integration
         
         protected HttpClient GetClient() => Factory.CreateClient();
 
-        protected async Task<HttpResponseMessage> Post(string url, string args = "")
+        protected async Task<HttpResponseMessage> Post(string url, string args = "", string id = "123")
         {
             var client = GetClient();
             var content = new StringContent("");
             content.Headers.Add("mc.args", args);
+            
+            if (!string.IsNullOrEmpty(id))
+                content.Headers.Add("mc.id", "123");
+            
             return await client.PostAsync(url, content);
         }
 
@@ -31,7 +36,11 @@ namespace MissionControl.Host.AspnetCore.Tests.Integration
         {
             var response = await Post(url, args);
             var body = await response.Content.ReadAsStringAsync();
-            var item = JsonConvert.DeserializeObject<R>(body);
+
+            R item = default(R);
+            if (!string.IsNullOrEmpty(body))
+                item = JsonConvert.DeserializeObject<R>(body);
+            
             return (response, item);
         }
     }

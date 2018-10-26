@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using MissionControl.Host.AspnetCore.Tests.Integration.Infrastructure;
 using MissionControl.Host.Core.Responses;
@@ -42,6 +44,14 @@ namespace MissionControl.Host.AspnetCore.Tests.Integration
 
             response.Item.Content.StartsWith("Description of command").ShouldBeTrue();
             response.Item.Content.Contains("CorrelationId", StringComparison.OrdinalIgnoreCase).ShouldBeFalse();
+        }
+
+        [Fact]
+        public async Task No_command_name_in_path_returns_error()
+        {
+            var response = await Post<List<string>>("/mc/cmd/");
+            
+            response.HttpResponse.StatusCode.ShouldBe(HttpStatusCode.ExpectationFailed);
         }
     }
 }
