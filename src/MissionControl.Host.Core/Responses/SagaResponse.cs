@@ -10,5 +10,7 @@ namespace MissionControl.Host.Core.Responses
         {
             Observable = observable;
         }
+
+        public override string Type => "saga";
     }
 }

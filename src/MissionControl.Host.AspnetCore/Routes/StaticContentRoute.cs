@@ -34,24 +34,24 @@ namespace MissionControl.Host.AspnetCore.Routes
             return !string.IsNullOrEmpty(reqUri) && _contentTypes.ContainsKey(GetExtension(reqUri)) && method == "get";
         }
 
-        public override async Task Handle(string reqUri, HttpRequest request, HttpResponse response)
+        public override async Task Handle(string reqUri, HttpRequest httpRequest, HttpResponse httpResponse)
         {
             var stream = _assembly.GetManifestResourceStream("MissionControl.Host.AspnetCore.Content." + reqUri);
 
             if (stream == null)
             {
-                response.StatusCode = 404;
+                httpResponse.StatusCode = 404;
                 return;
             }
 
             var ext = GetExtension(reqUri);
 
-            response.ContentType = _contentTypes.ContainsKey(ext)
+            httpResponse.ContentType = _contentTypes.ContainsKey(ext)
                 ? _contentTypes[ext]
                 : "text/plain";
 
             stream.Seek(0, SeekOrigin.Begin);
-            await stream.CopyToAsync(response.Body);
+            await stream.CopyToAsync(httpResponse.Body);
         }
 
         private static string GetExtension(string reqUri)

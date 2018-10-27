@@ -9,5 +9,7 @@ namespace MissionControl.Host.Core.Responses
             Content = message;
             StatusCode = HttpStatusCode.BadRequest;
         }
+
+        public override string Type => "error";
     }
 }

@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using MissionControl.Host.Core;
+using MissionControl.Host.Core.Responses;
+using MissionControl.Host.Core.Utilities;
 using Newtonsoft.Json;
 
 namespace MissionControl.Host.AspnetCore.Routes
@@ -16,7 +19,7 @@ namespace MissionControl.Host.AspnetCore.Routes
     {
         private const string IdHeader = "mc.id";
         private const string ArgsHeader = "mc.args";
-        private const string CmdUrlPrefix = "cmd/";
+        private const string CmdUrlPrefix = "cmd";
 
         private readonly IDispatcher _dispatcher;
         
@@ -35,43 +38,53 @@ namespace MissionControl.Host.AspnetCore.Routes
         /// /mc/command-name
         /// Pull command args from request header 
         /// </summary>
-        public override async Task Handle(string reqUri, HttpRequest request, HttpResponse response)
+        public override async Task Handle(string reqUri, HttpRequest httpRequest, HttpResponse httpResponse)
         {
-            var validationResult = ValidateRequest(request);
+            var validationResult = ValidateRequest(httpRequest);
+            var clientId = httpRequest.Headers[IdHeader];
+
+            CliResponse cliResponse;
+
             if (!validationResult.isValid)
             {
-                response.StatusCode = 417;
-                await response.WriteAsync(Json(validationResult.errors));
-                return;
+                cliResponse = new ErrorResponse(string.Join(", ", validationResult.errors))
+                {
+                    StatusCode = HttpStatusCode.ExpectationFailed
+                };
             }
-            
-            var req = BuildRequest(reqUri, request);
-
-            var cliResponse = await _dispatcher.Invoke(req);
-            
-            // very basic rendering, refactor this
-            var type = cliResponse.GetType().Name.Replace("Response", "").ToLower();
-            response.StatusCode = (int)cliResponse.StatusCode;
-            
-            await response.WriteAsync(Json(new
+            else
             {
-                type,
-                content = cliResponse.Content,
-                commandId = req.ClientId
-            })); 
+                try
+                {
+                    var request = BuildRequest(reqUri, httpRequest);
+                    cliResponse = await _dispatcher.Invoke(request);
+                }
+                catch (Exception e)
+                {
+                    cliResponse = new ErrorResponse(e.Unwrap().Message);
+                }
+
+            }
+
+            httpResponse.StatusCode = (int)cliResponse.StatusCode;
+            cliResponse.TerminalId = clientId;
+
+            await httpResponse.WriteAsync(Json(cliResponse)); 
         }
 
+        
         private static Request BuildRequest(string reqUri, HttpRequest request)
         {
             var req = new Request();
 
             // todo: what if clientId is not in header?
-            req.ClientId = request.Headers[IdHeader].FirstOrDefault();
+            req.ClientId = request.Headers[IdHeader];
             req.Command = reqUri.Replace(CmdUrlPrefix, "").Trim('/'); // todo: ugly
 
-            if (request.Headers.TryGetValue(ArgsHeader, out var values))
+            var args = request.Headers[ArgsHeader].ToString();
+            if (args.HasContent())
             {
-                req.Args = values[0].Split(';');
+                req.Args = args.Split(';');
             }
 
             return req;
@@ -79,6 +92,7 @@ namespace MissionControl.Host.AspnetCore.Routes
 
         private static readonly Regex CommandNameValidator = new Regex("(.*)(/cmd/)([a-z-_]{1,50})$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         
+        // todo: move to validator class
         private (bool isValid, List<string> errors) ValidateRequest(HttpRequest request)
         {
             var errors = new List<string>();

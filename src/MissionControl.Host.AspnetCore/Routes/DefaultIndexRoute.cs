@@ -19,11 +19,11 @@ namespace MissionControl.Host.AspnetCore.Routes
             _content = _assembly.GetManifestResourceStream("MissionControl.Host.AspnetCore.Content.index.html");
         }
 
-        public override async Task Handle(string reqUri, HttpRequest request, HttpResponse response)
+        public override async Task Handle(string reqUri, HttpRequest httpRequest, HttpResponse httpResponse)
         {
             _content.Seek(0, SeekOrigin.Begin);
 
-            await _content.CopyToAsync(response.Body);
+            await _content.CopyToAsync(httpResponse.Body);
         }
     }
 }

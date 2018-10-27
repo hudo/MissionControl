@@ -76,7 +76,9 @@ namespace MissionControl.Host.Core.Tests.Unit
             }
         }
         
-        private class TestResponse : CliResponse { }
+        private class TestResponse : CliResponse {
+            public override string Type { get; }
+        }
         private class TestCommand : CliCommand { }
     }
 }

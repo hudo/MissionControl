@@ -13,5 +13,15 @@ namespace MissionControl.Host.Core.Utilities
 
             return e;
         }
+
+        public static bool HasContent(this string value)
+        {
+            return !string.IsNullOrEmpty(value);
+        }
+
+        public static bool IsEmpty(this string value)
+        {
+            return string.IsNullOrEmpty(value);
+        }
     }
 }

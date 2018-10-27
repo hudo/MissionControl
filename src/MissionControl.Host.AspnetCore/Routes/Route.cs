@@ -33,6 +33,6 @@ namespace MissionControl.Host.AspnetCore.Routes
         /// Handle request
         /// </summary>
         /// <param name="reqUri">URL part after /mc</param>
-        public abstract Task Handle(string reqUri, HttpRequest request, HttpResponse response); // todo: revisit this
+        public abstract Task Handle(string reqUri, HttpRequest httpRequest, HttpResponse httpResponse); // todo: revisit this
     }
 }

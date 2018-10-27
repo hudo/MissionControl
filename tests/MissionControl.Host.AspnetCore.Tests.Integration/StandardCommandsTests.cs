@@ -49,9 +49,10 @@ namespace MissionControl.Host.AspnetCore.Tests.Integration
         [Fact]
         public async Task No_command_name_in_path_returns_error()
         {
-            var response = await Post<List<string>>("/mc/cmd/");
+            var response = await Post<ErrorResponse>("/mc/cmd/");
             
             response.HttpResponse.StatusCode.ShouldBe(HttpStatusCode.ExpectationFailed);
+            response.Item.Content.Contains("Error parsing command name").ShouldBeTrue();
         }
     }
 }
