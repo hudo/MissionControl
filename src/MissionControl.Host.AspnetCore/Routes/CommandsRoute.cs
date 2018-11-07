@@ -41,8 +41,8 @@ namespace MissionControl.Host.AspnetCore.Routes
         public override async Task Handle(string reqUri, HttpRequest httpRequest, HttpResponse httpResponse)
         {
             var validationResult = ValidateRequest(httpRequest);
-            var clientId = httpRequest.Headers[IdHeader];
 
+            var clientId = httpRequest.Headers[IdHeader];
             CliResponse cliResponse;
 
             if (!validationResult.isValid)

@@ -85,6 +85,7 @@ namespace MissionControl.Host.Core
         public void Dispose()
         {
             _timer?.Dispose();
+            _hostsRegistrations.Clear();
         }
     }
     

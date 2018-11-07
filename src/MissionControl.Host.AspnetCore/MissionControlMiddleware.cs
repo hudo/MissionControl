@@ -23,9 +23,7 @@ namespace MissionControl.Host.AspnetCore
 
         public MissionControlMiddleware(RequestDelegate next, 
             McOptions options,
-            Assembly[] assemblies,
             IDispatcher dispatcher, 
-            ICommandTypesCatalog catalog,
             ILogger<MissionControlMiddleware> logger)
         {
             _next = next;
@@ -52,36 +50,39 @@ namespace MissionControl.Host.AspnetCore
         {
             if (context.Request.Path.StartsWithSegments(_urlPrefix, out var suffixPath))
             {
-                if (!_options.Authentication(context.Request))
-                {
-                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    _logger.LogDebug($"Request not authorized: {context.Request.Path}");
-                    return;
-                }
-
-                context.Response.ContentType = "text/html";
-
-                var uri = suffixPath.Value.Trim('/').ToLower();
-                var route = _routes.FirstOrDefault(x => x.Match(uri, context.Request.Method.ToLower()));
-
-                if (route != null)
-                {
-                    context.Response.StatusCode = 200;
-
-                    _logger.LogTrace($"Route [{route.GetType().Name}] matched for request {context.Request.Path}");
-
-                    await route.Handle(uri, context.Request,  context.Response);
-                }
-                else
-                {
-                    _logger.LogDebug($"Route not found for request {context.Request.Path}");
-
-                    context.Response.StatusCode = 404;
-                }
+                await HandleCommand(context, suffixPath);
             }
             else
             {
                 await _next(context);
+            }
+        }
+
+        private async Task HandleCommand(HttpContext context, PathString suffixPath)
+        {
+            if (!_options.Authentication(context.Request))
+            {
+                context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+                _logger.LogDebug($"Request not authorized: {context.Request.Path}");
+                return;
+            }
+
+            context.Response.ContentType = "text/html";
+
+            var uri = suffixPath.Value.Trim('/').ToLower();
+            var route = _routes.FirstOrDefault(x => x.Match(uri, context.Request.Method.ToLower()));
+
+            if (route != null)
+            {
+                _logger.LogTrace($"Route [{route.GetType().Name}] matched for request {context.Request.Path}");
+
+                await route.Handle(uri, context.Request, context.Response);
+            }
+            else
+            {
+                _logger.LogDebug($"Route not found for request {context.Request.Path}");
+
+                context.Response.StatusCode = 404;
             }
         }
     }
