@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
     <meta charset="utf-8" />
     <title>Mission Control CLI Terminal</title>
@@ -8,16 +9,25 @@
     <script src="/mc/fetch.js"></script>
     <script src="/mc/script.js"></script>
 </head>
+
 <body>
-    <div class="main">
-        <div class="output-container">
-            <div class="output-item">
-                MC starting ...
+    <main class="th-light">
+        <section role="dialog">
+            <div class="row">
+                <div class="inner">
+                    MC starting ... Intro line? Always there?
+                </div>
             </div>
-        </div>
-        <div class="input-container">
-            <textarea class="cli" rows="1" autofocus="true"></textarea>
-        </div>
-    </div>
+            <div class="row">
+                <div class="inner">
+                    Some returned data, content, after cmd issued
+                </div>
+            </div>
+        </section>
+        <section role="form">
+            <textarea class="cmd" rows="1" autofocus="true"></textarea>
+        </section>
+    </main>
 </body>
+
 </html>

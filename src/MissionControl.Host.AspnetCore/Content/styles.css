@@ -1,22 +1,58 @@
-body {
-    font-family: Menlo, Consolas, Monospace;
-    font-size: 0.85rem;   
+/* General, Typology, ... */
+html, body {
+    width: 100%;
+    height: 100%;
 }
 
-.cli:before {
+body {
+    font-family: Menlo, Consolas, Monospace;
+    font-size: 0.85rem;  
+    color: #101010;
+    line-height: 1.6rem;
+    margin: 0;
+    padding: 0; 
+}
+
+article, aside, footer, header, hgroup, main, nav, section {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Console */
+.row {
+    border-bottom: 1px dashed #ccc;
+}
+
+.row .inner {
+    padding-left: 1.4rem;
+    padding-right: .5rem;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+}
+
+[role=form] {
+    position: relative;
+}
+
+[role=form]:before {
     content: '>';
+    color: red;
     position: absolute;
-    top: 0.9rem;
-    left: 0.4rem;
+    top: 0;
+    left: .5rem;
     width: 12px;
     height: 12px;
 }
 
-.cli {
-    resize: none;
-    border: 0;
-    padding: 0.6rem;
-    display: block;
-    width: 100%;
+.cmd {
+    padding-left: 1.5rem;
+    padding-right: .5rem;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
     background: none;
+    border: none;
+    line-height: 1;
+    outline: none;
+    resize: none;
 }
+
