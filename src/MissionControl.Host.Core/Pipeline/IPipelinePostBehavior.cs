@@ -1,7 +1,8 @@
 ﻿using System.Threading.Tasks;
+using MissionControl.Host.Core.Contracts;
 using MissionControl.Host.Core.Responses;
 
-namespace MissionControl.Host.Core.Contracts.Pipeline
+namespace MissionControl.Host.Core.Pipeline
 {
     public interface IPipelinePostBehavior<in T> where T : CliCommand
     {

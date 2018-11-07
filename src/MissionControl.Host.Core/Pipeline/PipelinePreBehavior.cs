@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using MissionControl.Host.Core.Contracts;
 using MissionControl.Host.Core.Responses;
 
-namespace MissionControl.Host.Core.Contracts.Pipeline
+namespace MissionControl.Host.Core.Pipeline
 {
-    public class PipelinePreBehavior<T> : IPipelineBehavior<T> where T:CliCommand
+    internal class PipelinePreBehavior<T> : IPipelineBehavior<T> where T:CliCommand
     {
         private readonly IEnumerable<IPipelinePreBehavior<T>> _preBehaviors;
 

@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using MissionControl.Host.Core.Contracts;
 using MissionControl.Host.Core.Responses;
 
-namespace MissionControl.Host.Core.Contracts.Pipeline
+namespace MissionControl.Host.Core.Pipeline
 {
-    public class PipelinePostBehavior<T> : IPipelineBehavior<T> where T:CliCommand
+    internal class PipelinePostBehavior<T> : IPipelineBehavior<T> where T:CliCommand
     {
         private readonly IEnumerable<IPipelinePostBehavior<T>> _postBehaviors;
 

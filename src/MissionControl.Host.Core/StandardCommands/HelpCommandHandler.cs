@@ -1,12 +1,12 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using MissionControl.Host.Core.Contracts.Pipeline;
+using MissionControl.Host.Core.Contracts;
+using MissionControl.Host.Core.Pipeline;
 using MissionControl.Host.Core.Responses;
 
-namespace MissionControl.Host.Core.Contracts.StandardCommands
+namespace MissionControl.Host.Core.StandardCommands
 {
     internal class HelpInterceptorPipeline<T> : IPipelineBehavior<T> where T: CliCommand
     {

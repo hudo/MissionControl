@@ -10,13 +10,14 @@ namespace MissionControl.Host.AspnetCore.Routes
     /// </summary>
     public class DefaultIndexRoute : Route
     {
-        private readonly Assembly _assembly;
         private readonly Stream _content;
 
-        public DefaultIndexRoute(Assembly assembly) : base("")
+        /// <summary>
+        /// Serves index.html for GET /mc request 
+        /// </summary>
+        public DefaultIndexRoute(Assembly assembly) : base("", "get")
         {
-            _assembly = assembly;
-            _content = _assembly.GetManifestResourceStream("MissionControl.Host.AspnetCore.Content.index.html");
+            _content = assembly.GetManifestResourceStream("MissionControl.Host.AspnetCore.Content.index.html");
         }
 
         public override async Task Handle(string reqUri, HttpRequest httpRequest, HttpResponse httpResponse)

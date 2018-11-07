@@ -4,22 +4,13 @@ using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using MissionControl.Host.Core;
-using MissionControl.Host.Core.Contracts.StandardCommands;
+using MissionControl.Host.Core.StandardCommands;
 
 namespace MissionControl.Host.AspnetCore
 {
     public static class MiddlewareExtensions
     {
         private static Assembly[] _assemblies;
-        
-        public static IApplicationBuilder UseMissingControl(this IApplicationBuilder builder, Action<McOptions> configuration = null)
-        {
-            var options = new McOptions();
-
-            configuration?.Invoke(options);
-
-            return builder.UseMiddleware<MissionControlMiddleware>(options);
-        }
 
         /// <summary>
         /// Register services into container
@@ -36,6 +27,19 @@ namespace MissionControl.Host.AspnetCore
                 .ToArray();
 
             Registry.RegisterServices(services, _assemblies);
+        }
+        
+        /// <summary>
+        /// Adds MissionControl middleware on configured console endpoint.
+        /// </summary>
+        /// <param name="configuration">Optional configuration settings. Use this to configure console endpoint (default is /mc) and authentication</param>
+        public static IApplicationBuilder UseMissingControl(this IApplicationBuilder builder, Action<McOptions> configuration = null)
+        {
+            var options = new McOptions();
+
+            configuration?.Invoke(options);
+
+            return builder.UseMiddleware<MissionControlMiddleware>(options);
         }
     }
 }
