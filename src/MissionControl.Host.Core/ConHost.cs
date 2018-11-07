@@ -56,14 +56,14 @@ namespace MissionControl.Host.Core
         private async Task ProcessInbox()
         {
             _logger.LogDebug("Started processing ConHost commands");
-            foreach (var item in _inbox.GetConsumingEnumerable())
+            foreach (var request in _inbox.GetConsumingEnumerable())
             {
-                var cmdName = item.command.GetType().Name;
+                var cmdName = request.command.GetType().Name;
                 try
                 {
                     var stopwatch = Stopwatch.StartNew();
 
-                    var handleTask = ResolveHandler(item.command, item.completionSource, cmdName);
+                    var handleTask = ResolveHandler(request.command, request.completionSource, cmdName);
                     
                     if (handleTask == null) continue;
                     
@@ -72,15 +72,15 @@ namespace MissionControl.Host.Core
                     stopwatch.Stop();
                     _logger.LogInformation($"Command [{cmdName}] executed in {stopwatch.ElapsedMilliseconds}ms");
                     
-                    item.completionSource.SetResult(response);
+                    request.completionSource.SetResult(response);
                     
-                    Record(item.command);
+                    Record(request.command);
                 }
                 catch (Exception e)
                 {
                     _logger.LogError(e, $"Error executing command [{cmdName}]: {e.Unwrap().Message}");
                     
-                    item.completionSource.SetResult(new ErrorResponse(e.Unwrap().Message));
+                    request.completionSource.SetResult(new ErrorResponse(e.Unwrap().Message));
                 }
             }
         }

@@ -18,7 +18,7 @@ namespace MissionControl.Host.AspnetCore
 
             configuration?.Invoke(options);
 
-            return builder.UseMiddleware<MissionControlMiddleware>(options, _assemblies);
+            return builder.UseMiddleware<MissionControlMiddleware>(options);
         }
 
         /// <summary>

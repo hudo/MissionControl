@@ -13,7 +13,7 @@ namespace MissionControl.Host.Core
             services.AddTransient<IRequestParser, RequestParser>();
             services.AddSingleton<IConHostFactory, ConHostFactory>();
 
-            services.AddScoped<ServiceFactory>(x => x.GetService);
+            services.AddSingleton<ServiceFactory>(x => x.GetService);
 
             var catalog = new CommandTypesCatalog();
 
