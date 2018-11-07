@@ -2,7 +2,7 @@ using System;
 
 namespace MissionControl.Host.Core.Utilities
 {
-    public struct Maybe<T> where T:class
+    internal struct Maybe<T> where T:class
     {
         private readonly T _value;
 

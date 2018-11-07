@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MissionControl.Host.Core.Contracts;
-using MissionControl.Host.Core.Contracts.Pipeline;
+using MissionControl.Host.Core.Pipeline;
 using MissionControl.Host.Core.Responses;
 using MissionControl.Host.Core.Utilities;
 using Newtonsoft.Json;

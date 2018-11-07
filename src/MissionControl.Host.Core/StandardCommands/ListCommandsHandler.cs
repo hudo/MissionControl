@@ -1,9 +1,9 @@
-using System;
 using System.Linq;
 using System.Threading.Tasks;
+using MissionControl.Host.Core.Contracts;
 using MissionControl.Host.Core.Responses;
 
-namespace MissionControl.Host.Core.Contracts.StandardCommands
+namespace MissionControl.Host.Core.StandardCommands
 {
     [CliCommand("list-commands", help: "List of registered commands")]
     internal class ListCommandsCommand : CliCommand

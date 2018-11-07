@@ -32,6 +32,10 @@ namespace MissionControl.Host.Core
                 {
                     registrations.Add(new CommandRegistration { Name = attribute.CommandText.ToLower(), Type = type, Attribute = attribute});
                 }
+                else
+                {
+                    Console.WriteLine($"warning: CliCommand {type.Name} is missing CliCommandAttribute!");
+                }
             }
 
             RegisteredCommands = registrations.ToArray();

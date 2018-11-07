@@ -18,6 +18,9 @@ namespace MissionControl.Host.AspnetCore
         /// </summary>
         public string Url { get; set; }
 
+        /// <summary>
+        /// Authenticate each request for console access. Allows access by default. 
+        /// </summary>
         public Func<HttpRequest, bool> Authentication { get; set; }
     }
 }
