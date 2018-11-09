@@ -13,6 +13,8 @@ namespace MissionControl.Host.Core
     {
         private readonly ILogger<RequestParser> _logger;
         private readonly ICommandTypesCatalog _catalog;
+        
+        private readonly char[] _separators = new[] { '=',':' };
 
         public RequestParser(ICommandTypesCatalog catalog, ILogger<RequestParser> logger)
         {
@@ -49,7 +51,7 @@ namespace MissionControl.Host.Core
                     // todo: ugly, refactor!
                     // implement simple tokenizer and parser
                     
-                    var parts = arg.Split('=');
+                    var parts = arg.Split(_separators, StringSplitOptions.RemoveEmptyEntries);
                     key = parts[0].TrimStart('-');
                     var propertyInfo = type.GetProperty(key, BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.Instance);
 
@@ -65,11 +67,11 @@ namespace MissionControl.Host.Core
                         propertyInfo.SetValue(command, Convert.ChangeType(value, propertyInfo.PropertyType), null);
                     }
                     else
-                        _logger.LogTrace($"Field '{key}' not found on type '{type.Name}'");
+                        _logger.LogTrace($"Field [{key}] not found on type [{type.Name}]");
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, $"Error mapping value {key} to {type.Name}");
+                    _logger.LogError(e, $"Error mapping value of key [{key}] to [{type.Name}]");
                 }
             }
         }
