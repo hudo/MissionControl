@@ -34,7 +34,25 @@ class Parser {
     }
 }
 
+class ViewModel {
+    private readonly input : HTMLTextAreaElement;
+    
+    constructor(input: HTMLTextAreaElement) {
+        this.input = input;
+        this.input.addEventListener("keypress", (e : KeyboardEvent) => {
+            if (e.which == 13) 
+                this.onExecute(e);
+        });
+    }
+
+    private onExecute(e:KeyboardEvent) {
+        console.log("enter!");
+        this.input.value = "";
+        e.preventDefault();
+    }
+}
+
 
 window.onload = () => {
-    
+    new ViewModel(<HTMLTextAreaElement>document.getElementById("cli-input"));
 };

@@ -49,7 +49,8 @@ MissionControl acts as a CLI UI Terminal, proxying commands to handlers built by
 - [ ] JS: response rendering (text, warnings, errors)
 - [ ] JS: get previous command (history)
 - [ ] JS: unit tests
-- [ ] cluster epic (control many services from one console)
+- [ ] control specific service instance in a cluster (epic)
+- [ ] workflows/sagas/muliple response objects (epic)
 - [ ] Refactor: argument parser (implement tokenizer)
 - [ ] Refactor: better command/handler contracts for easier/streamlined development
 - [x] Included commands: ping, list-commands, command help

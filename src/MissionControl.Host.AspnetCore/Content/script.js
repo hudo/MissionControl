@@ -29,7 +29,28 @@ var Parser = /** @class */ (function () {
         });
         return args;
     };
+    Parser.prototype.getCommand = function (input) {
+        return input.split(" ")[0];
+    };
     return Parser;
 }());
+var ViewModel = /** @class */ (function () {
+    function ViewModel(input) {
+        var _this = this;
+        this.input = input;
+        this.input.addEventListener("keypress", function (e) {
+            if (e.which == 13)
+                _this.onExecute(e);
+        });
+    }
+    ViewModel.prototype.onExecute = function (e) {
+        console.log("enter!");
+        this.input.value = "";
+        e.preventDefault();
+    };
+    return ViewModel;
+}());
 window.onload = function () {
+    new ViewModel(document.getElementById("cli-input"));
 };
+//# sourceMappingURL=script.js.map

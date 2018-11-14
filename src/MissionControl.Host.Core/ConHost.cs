@@ -44,7 +44,7 @@ namespace MissionControl.Host.Core
             if (_inbox.IsAddingCompleted)
                 throw new ApplicationException("ConHost stopped"); 
             
-            var completionSource = new TaskCompletionSource<CliResponse>();
+            var completionSource = new TaskCompletionSource<CliResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             
             _inbox.Add((command, completionSource));
             

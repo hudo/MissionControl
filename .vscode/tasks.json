@@ -10,6 +10,17 @@
                 "${workspaceFolder}/tests/MissionControl.Host.Core.Tests.Unit/MissionControl.Host.Core.Tests.Unit.csproj"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "type": "typescript",
+            "tsconfig": "src\\MissionControl.Host.AspnetCore\\Content\\tsconfig.json",
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
