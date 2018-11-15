@@ -26,7 +26,7 @@ MissionControl serves CLI web terminal on a dedicated URL and executes custom co
 - serves CLI UI interface on dedicated URL (/mc by default)
 - automatically registers all commands/handlers in the app
 
-## Installation and usage
+## Installation and configuration
 
 In Startup.cs register services and add a middleware:
 
@@ -75,6 +75,10 @@ Typescript
 https://www.nuget.org/packages/MissionControl
 
 [Release Notes](https://github.com/hudo/MissionControl/blob/master/RELEASE-NOTES.md)
+
+## Contributors
+
+[Ivana Dukic](https://github.com/idukic) 
 
 # State of development
 
