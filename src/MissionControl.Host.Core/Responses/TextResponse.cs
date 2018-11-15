@@ -7,6 +7,6 @@
             Content = content;
         }
 
-        public override string Type => "error";
+        public override string Type => "text";
     }
 }

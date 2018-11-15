@@ -9,6 +9,7 @@ using MissionControl.Host.Core;
 using MissionControl.Host.Core.Responses;
 using MissionControl.Host.Core.Utilities;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace MissionControl.Host.AspnetCore.Routes
 {
@@ -116,6 +117,7 @@ namespace MissionControl.Host.AspnetCore.Routes
         {
             NullValueHandling = NullValueHandling.Ignore,
             Formatting = Formatting.Indented,
+            ContractResolver = new CamelCasePropertyNamesContractResolver()
         };
     }
 }

@@ -54,5 +54,6 @@ article, aside, footer, header, hgroup, main, nav, section {
     line-height: 1;
     outline: none;
     resize: none;
+    font: 1rem monospace;
 }
 
