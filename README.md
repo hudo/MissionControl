@@ -1,5 +1,8 @@
 # MissionControl
-CLI for your web apps and microservices
+
+[![Nuget Package](https://badgen.net/nuget/v/missioncontrol)](https://www.nuget.org/packages/missioncontrol/)
+
+CLI as a middleware for your web apps and microservices
 
 **UNDER HEAVY DEVELOPMENT**
 
@@ -29,6 +32,12 @@ MissionControl acts as a CLI UI Terminal, proxying commands to handlers built by
 ## Technologies
 
 .NET Standard 2.0 / Core 2.0
+
+## Nuget
+
+https://www.nuget.org/packages/MissionControl
+
+[Release Notes](https://github.com/hudo/MissionControl/blob/master/RELEASE-NOTES.md)
 
 # State of development
 
