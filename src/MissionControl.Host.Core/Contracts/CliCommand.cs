@@ -8,6 +8,7 @@
         /// <summary>
         /// Displays help for invoked command
         /// </summary>
+        [CliArg(help: "Display command help")]
         public bool Help { get; set; }
     }
 }

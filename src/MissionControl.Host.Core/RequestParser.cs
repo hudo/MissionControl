@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using MissionControl.Host.Core.Contracts;
@@ -43,7 +44,7 @@ namespace MissionControl.Host.Core
 
         private void ParseArguments(Request request, Type type, CliCommand command)
         {
-            foreach (var arg in request.Args)
+            foreach (var arg in request.Args.Where(x => x.HasContent()))
             {
                 var key = "";
                 try

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MissionControl.Host.Core.Contracts;
 using MissionControl.Host.Core.Pipeline;
 using MissionControl.Host.Core.Responses;
+using MissionControl.Host.Core.Utilities;
 
 namespace MissionControl.Host.Core.StandardCommands
 {
@@ -33,7 +34,10 @@ namespace MissionControl.Host.Core.StandardCommands
 
             if (registration != null)
             {
-                builder.Append(registration.Attribute.Help).Append("\nAvailable arguments:\n");
+                if (registration.Attribute.Help.HasContent())
+                    builder.Append(registration.Attribute.Help).Append("\n");
+
+                builder.Append("Available arguments:\n");
 
                 var properties = registration.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
@@ -55,7 +59,7 @@ namespace MissionControl.Host.Core.StandardCommands
                     }
                     else
                     {
-                        builder.Append("-").Append(propertyInfo.Name);
+                        builder.Append("-").Append(propertyInfo.Name.ToLower());
                     }
 
                     builder.Append("\n");

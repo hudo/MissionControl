@@ -3,6 +3,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
   </PropertyGroup>
+  <PropertyGroup>
+    <NuspecFile>MissionControl.Host.AspnetCore.nuspec</NuspecFile>
+</PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Content\index.html" />
     <EmbeddedResource Include="Content\script.js" />
@@ -18,6 +21,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MissionControl.Host.Core\MissionControl.Host.Core.csproj" />
+    <ProjectReference Include="..\MissionControl.Host.Core\MissionControl.Host.Core.csproj">
+    </ProjectReference>
   </ItemGroup>
 </Project>

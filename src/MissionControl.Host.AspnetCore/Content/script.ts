@@ -17,7 +17,7 @@ class Arg {
 class HostService {
     async send(cmd: string, args: Array<Arg>) : Promise<CliResponse> {    
         let headerArgs = "";
-        for(let item of args) headerArgs +=  item.key + "=" + item.val + ";"
+        for (let item of args) headerArgs += item.key + "=" + item.val + ";";
 
         let data = await fetch("mc/cmd/" + cmd, {
             method : "POST",
@@ -27,7 +27,7 @@ class HostService {
             })
         });
 
-        let response : CliResponse = await data.json();
+        let response: CliResponse = await data.json();
         return response;
     }
 }

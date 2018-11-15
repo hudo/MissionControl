@@ -85,13 +85,13 @@ namespace MissionControl.Host.AspnetCore.Routes
             var args = request.Headers[ArgsHeader].ToString();
             if (args.HasContent())
             {
-                req.Args = args.Split(';');
+                req.Args = args.Split(new []{';'}, StringSplitOptions.RemoveEmptyEntries);
             }
 
             return req;
         }
 
-        private static readonly Regex CommandNameValidator = new Regex("(.*)(/cmd/)([a-z-_]{1,50})$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex CommandNameValidator = new Regex("(.*)(/cmd/)([a-z-_1-9]{1,50})$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         
         // todo: move to validator class
         private (bool isValid, List<string> errors) ValidateRequest(HttpRequest request)
