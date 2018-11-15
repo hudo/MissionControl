@@ -4,7 +4,7 @@
 
 CLI as a middleware for your web apps and microservices
 
-**UNDER HEAVY DEVELOPMENT**
+**UNDER DEVELOPMENT - alpha version**
 
 # Why
 
@@ -16,10 +16,7 @@ Often we want to add some kind of interaction with our application. For example:
 - add new user to database, update database records 
 - etc
 
-and all that without building admin HTML UI.   
-
-MissionControl acts as a CLI UI Terminal, proxying commands to handlers built by application developer. 
-
+MissionControl serves CLI web terminal on a dedicated URL and executes custom commands created by application developer. There are some generic commands already bundled with this library, like *list-commands*, help and diagnostics. Custom commands are easy to add by just implementing an interface or adding an attribute, and MissonControl will handle the rest. 
 
 # How it works
 
@@ -29,9 +26,49 @@ MissionControl acts as a CLI UI Terminal, proxying commands to handlers built by
 - serves CLI UI interface on dedicated URL (/mc by default)
 - automatically registers all commands/handlers in the app
 
+## Installation and usage
+
+In Startup.cs register services and add a middleware:
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddMissionControl();
+}
+
+public void Configure(IApplicationBuilder app)
+{
+    app.UseMissingControl();
+}
+
+```
+
+With custom configuration:  
+- all assemblies that contains commands and command handlers
+- Url where CLI is served
+- authentication callback - add your own request authentication to prevent execution of commands in production
+
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddMissionControl(typeof(PurgeCacheCommand).Assembly, typeof(ListActiveUsersCommand).Assembly);
+}
+
+public void Configure(IApplicationBuilder app)
+{
+    app.UseMissingControl(opt =>
+    {
+        opt.Url = "/mc";
+        opt.Authentication = req => true;
+    });
+}
+```
+
 ## Technologies
 
-.NET Standard 2.0 / Core 2.0
+.NET Standard 2.0 / Core 2.0   
+Typescript
 
 ## Nuget
 
