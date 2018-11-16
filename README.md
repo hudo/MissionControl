@@ -140,10 +140,10 @@ Thanks [David Guerin](https://github.com/dguerin) for name idea!
 - [x] Command/handlers scanning
 - [x] Invoke of requested commnad handler
 - [x] Handler pre/post pipeline behavior
-- [ ] Args: help (done), skip (done), required
+- [x] Args: help (done), skip (done), required (done)
 - [ ] UI CSS standards
 - [ ] JS: UI layout and structure
-- [ ] JS: input parsing
+- [x] JS: input parsing
 - [ ] JS: ajax proxy
 - [ ] JS: response rendering (text, warnings, errors)
 - [ ] JS: get previous command (history)
@@ -153,5 +153,6 @@ Thanks [David Guerin](https://github.com/dguerin) for name idea!
 - [ ] Refactor: argument parser (implement tokenizer)
 - [ ] Refactor: better command/handler contracts for easier/streamlined development
 - [x] Included commands: ping, list-commands, command help
-- [ ] DevOps: build pipeline
+- [ ] DevOps: build, test and deployment pipeline
+- [ ] DevOps: automatic nuget release
 - [ ] DevOps: sample site deployment pipeline

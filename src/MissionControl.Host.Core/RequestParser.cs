@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using MissionControl.Host.Core.Contracts;
 using MissionControl.Host.Core.Utilities;
@@ -30,9 +32,7 @@ namespace MissionControl.Host.Core
             if (registration.IsNull)
                 throw new ArgumentException($"Command '{request.Command}' not found.");
 
-            var command = Activator.CreateInstance(registration.Value.Type) as CliCommand;
-
-            if (command == null)
+            if (!(Activator.CreateInstance(registration.Value.Type) is CliCommand command))
                 throw new Exception("Command needs to inherit CliCommand");
 
             command.CorrelationId = request.ClientId;
@@ -43,7 +43,13 @@ namespace MissionControl.Host.Core
         }
 
         private void ParseArguments(Request request, Type type, CliCommand command)
-        {
+        { 
+            var hasHelpArg = false;
+            var usedProps = new List<PropertyInfo>();
+            var cmdProps = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Select(x => (propInfo: x,  attrib : x.GetCustomAttribute<CliArgAttribute>()))
+                .ToArray();
+
             foreach (var arg in request.Args.Where(x => x.HasContent()))
             {
                 var key = "";
@@ -54,18 +60,21 @@ namespace MissionControl.Host.Core
                     
                     var parts = arg.Split(_separators, StringSplitOptions.RemoveEmptyEntries);
                     key = parts[0].TrimStart('-');
-                    var propertyInfo = type.GetProperty(key, BindingFlags.Public | BindingFlags.IgnoreCase | BindingFlags.Instance);
 
-                    if (propertyInfo != null)
+                    if (key.Equals("help", StringComparison.OrdinalIgnoreCase))
+                        hasHelpArg = true;
+                     
+                    var cmdProp = cmdProps.FirstOrDefault(x => x.propInfo.Name.Equals(key, StringComparison.OrdinalIgnoreCase));
+
+                    if (cmdProp.propInfo != null)
                     {
-                        var attribute = propertyInfo.GetCustomAttribute<CliArgAttribute>();
-
-                        if (attribute?.Skip == true)
+                        if (cmdProp.attrib?.Skip == true)
                             continue;
 
-                        var value = ExtractValue(parts, propertyInfo);
+                        var value = ExtractValue(parts, cmdProp.propInfo);
 
-                        propertyInfo.SetValue(command, Convert.ChangeType(value, propertyInfo.PropertyType), null);
+                        cmdProp.propInfo.SetValue(command, Convert.ChangeType(value, cmdProp.propInfo.PropertyType), null);
+                        usedProps.Add(cmdProp.propInfo);
                     }
                     else
                         _logger.LogTrace($"Field [{key}] not found on type [{type.Name}]");
@@ -74,6 +83,19 @@ namespace MissionControl.Host.Core
                 {
                     _logger.LogError(e, $"Error mapping value of key [{key}] to [{type.Name}]");
                 }
+            }
+    
+            if (!hasHelpArg)
+                CheckRequiredArguments(cmdProps, usedProps);
+        }
+
+        private static void CheckRequiredArguments((PropertyInfo propInfo, CliArgAttribute attrib)[] cmdProps, List<PropertyInfo> usedProps)
+        {
+            var missingArgs = cmdProps.Where(x => x.attrib?.Required == true && !usedProps.Contains(x.propInfo)).ToArray();
+
+            if (missingArgs.Any())
+            {
+                throw new Exception($"Required arguments not populated: {string.Join(", ", missingArgs.Select(x => x.propInfo.Name.ToLower()))}");
             }
         }
 

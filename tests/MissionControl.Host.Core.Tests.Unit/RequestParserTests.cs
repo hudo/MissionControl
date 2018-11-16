@@ -18,7 +18,8 @@ namespace MissionControl.Host.Core.Tests.Unit
                 .Setup(x => x.RegisteredCommands)
                 .Returns(new[]
                 {
-                    new CommandRegistration {Name = "test", Type = typeof(TestCommand), Attribute = new CliCommandAttribute("test")}
+                    new CommandRegistration {Name = "test", Type = typeof(TestCommand), Attribute = new CliCommandAttribute("test")},
+                    new CommandRegistration {Name = "test2", Type = typeof(Test2Command), Attribute = new CliCommandAttribute("test2")}, 
                 });
                 
             _requestParser = new RequestParser(_typeCatalogMock.Object, Mock.Of<ILogger<RequestParser>>());
@@ -106,12 +107,38 @@ namespace MissionControl.Host.Core.Tests.Unit
             command.Value.CorrelationId.ShouldBeNullOrEmpty();
         }
 
+        [Fact]
+        public void Exception_on_missing_required_arg()
+        {
+            var cmd = _requestParser.Parse(new Request
+            {
+                Command = "test2",
+                Args = new[] {"-required=123;-notRequired=123"}
+            });
+            
+            cmd.IsSome.ShouldBeTrue();
+
+            Assert.Throws<Exception>(() => { 
+                _requestParser.Parse(new Request
+                {
+                    Command = "test2",
+                    Args = new[] {"-notRequired=foo"}
+                });
+            });
+        }
+
         private class TestCommand : CliCommand
         {
             public string Prop1 { get; set; }
             public int Prop2 { get; set; }
             public decimal Prop3 { get; set; }
             public bool Prop4 { get; set; }
+        }
+
+        private class Test2Command : CliCommand
+        {
+            [CliArg(required: true)] public string Required { get; set; }
+            [CliArg(required: false)] public string NotRequired { get; set; }
         }
     }
 }

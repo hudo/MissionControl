@@ -7,6 +7,7 @@ namespace SampleApp.cli
     [CliCommand("sample", "Sample command with Foo argument")]
     public class SampleCommand : CliCommand
     {
+        [CliArg(true, "Foo prop that's required", skip: false)]
         public string Foo { get; set; }
     }
 
