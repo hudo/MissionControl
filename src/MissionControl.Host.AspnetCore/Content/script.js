@@ -100,7 +100,7 @@ var ViewModel = /** @class */ (function () {
     ViewModel.prototype.init = function () {
         var _this = this;
         this.input.addEventListener("keypress", function (e) {
-            if (e.which == 13) {
+            if (e.which === 13) {
                 _this.onExecute(e);
                 _this.input.value = "";
                 e.preventDefault();

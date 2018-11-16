@@ -141,6 +141,7 @@ Thanks [David Guerin](https://github.com/dguerin) for name idea!
 - [x] Invoke of requested commnad handler
 - [x] Handler pre/post pipeline behavior
 - [x] Args: help (done), skip (done), required (done)
+- [ ] Authentication (username/pass, JWT bearer)
 - [ ] UI CSS standards
 - [ ] JS: UI layout and structure
 - [x] JS: input parsing

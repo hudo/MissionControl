@@ -1,4 +1,4 @@
-interface CliResponse {
+interface ICliResponse {
     type: string;
     content: string;
     terminalId: string;
@@ -15,11 +15,11 @@ class Arg {
 }
 
 class HostService {
-    async send(cmd: string, args: Array<Arg>) : Promise<CliResponse> {    
+    async send(cmd: string, args: Array<Arg>) : Promise<ICliResponse> {    
         let headerArgs = "";
         for (let item of args) headerArgs += item.key + "=" + item.val + ";";
 
-        let data = await fetch("mc/cmd/" + cmd, {
+        const data = await fetch("mc/cmd/" + cmd, {
             method : "POST",
             headers : new Headers({
                 "mc.id" : "123",
@@ -27,7 +27,7 @@ class HostService {
             })
         });
 
-        let response: CliResponse = await data.json();
+        const response: ICliResponse = await data.json();
         return response;
     }
 }
@@ -48,11 +48,11 @@ class Parser {
 }
 
 class ViewModel {
-    private readonly input : HTMLTextAreaElement;
-    private readonly view : HTMLDivElement;
+    input : HTMLTextAreaElement;
+    view : HTMLDivElement;
 
-    private readonly parser : Parser;
-    private readonly hostService : HostService;
+    parser : Parser;
+    hostService : HostService;
     
     constructor(input: HTMLTextAreaElement, view : HTMLDivElement) {
         this.view = view;
@@ -63,7 +63,7 @@ class ViewModel {
 
     init():void {
         this.input.addEventListener("keypress", (e : KeyboardEvent) => {
-            if (e.which == 13) {
+            if (e.which === 13) {
                 this.onExecute(e);
                 this.input.value = "";
                 e.preventDefault();
@@ -72,9 +72,9 @@ class ViewModel {
     }
 
     private onExecute(e:KeyboardEvent) {
-        let input = this.input.value;
-        let command = this.parser.getCommand(input);
-        let args = this.parser.getArgs(input);
+        const input = this.input.value;
+        const command = this.parser.getCommand(input);
+        const args = this.parser.getArgs(input);
 
         this.hostService
             .send(command, args)
