@@ -33,11 +33,13 @@ In Startup.cs register services and add a middleware:
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
+    // registers internal dependencies, scans this assemly for commands
     services.AddMissionControl();
 }
 
 public void Configure(IApplicationBuilder app)
 {
+    // registers /mc endpoint
     app.UseMissingControl();
 }
 
@@ -52,6 +54,7 @@ With custom configuration:
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
+    // assemblies where commands and handlers are located
     services.AddMissionControl(typeof(PurgeCacheCommand).Assembly, typeof(ListActiveUsersCommand).Assembly);
 }
 
@@ -60,10 +63,54 @@ public void Configure(IApplicationBuilder app)
     app.UseMissingControl(opt =>
     {
         opt.Url = "/mc";
-        opt.Authentication = req => true;
+        opt.Authentication = req => true; // this allows all requests, but add authentication for production deployments! 
     });
 }
 ```
+
+Simple command and handler example: 
+
+```csharp
+[CliCommand("say-hi", "Say Hi!")]
+public class SayHiCommand : CliCommand
+{
+    public string Name { get; set; }
+
+    [CliArg(required: false, help: "Attribute is optional")]
+    public int Foo { get;set; }
+}
+
+public class SayHiHandler: ICliCommandHandler<SayHiCommand>
+{
+    // IService is resolved with standard asp.net ioc
+    public SayHiHandler(IService service) { }
+
+    public async Task<CliResponse> Handle(SayHiCommand command)
+    {
+        await DoSomeAsyncWork();
+        return new TextResponse($"Computer says hi to {command.Name}!");
+    }
+}
+
+```
+
+Invoked in CLI console with:
+
+```
+> say-hi -name=Hackerman
+Computer says hi to Hackerman!
+> _
+```
+
+## Included commands
+
+Standard commands bundled with MC:
+
+- list-commands: displayes a list of registered commands
+
+TODO: system diagnostics commands
+
+every command can be invoked with **-help** argument. Handler will not be executed, but list of command arguments and its descriptions will be displayed in the console. 
 
 ## Technologies
 
@@ -78,7 +125,9 @@ https://www.nuget.org/packages/MissionControl
 
 ## Contributors
 
-[Ivana Dukic](https://github.com/idukic) 
+[Ivana Dukic](https://github.com/idukic)  
+
+Thanks [David Guerin](https://github.com/dguerin) for name idea!  
 
 # State of development
 
