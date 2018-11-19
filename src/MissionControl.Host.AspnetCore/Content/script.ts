@@ -1,7 +1,7 @@
 interface ICliResponse {
     type: string;
     content: string;
-    terminalId: string;
+    clientId: string;
     statusCode: number;
 }
 

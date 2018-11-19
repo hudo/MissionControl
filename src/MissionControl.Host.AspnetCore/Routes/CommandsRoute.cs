@@ -68,7 +68,7 @@ namespace MissionControl.Host.AspnetCore.Routes
             }
 
             httpResponse.StatusCode = (int)cliResponse.StatusCode;
-            cliResponse.TerminalId = clientId;
+            cliResponse.ClientId = clientId;
 
             await httpResponse.WriteAsync(Json(cliResponse)); 
         }
