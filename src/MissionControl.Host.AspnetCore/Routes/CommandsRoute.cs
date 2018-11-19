@@ -23,7 +23,7 @@ namespace MissionControl.Host.AspnetCore.Routes
         private const string CmdUrlPrefix = "cmd";
 
         private readonly IDispatcher _dispatcher;
-        
+
         public CommandsRoute(IDispatcher dispatcher) : base("")
         {
             _dispatcher = dispatcher;

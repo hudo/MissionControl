@@ -21,6 +21,8 @@ namespace MissionControl.Host.Core
         private static readonly object Lock = new object();
         private readonly Timer _timer;
         
+        private OutputBuffer _outputBuffer = new OutputBuffer();
+
         private readonly List<ConHostRegistration> _hostsRegistrations = new List<ConHostRegistration>();
 
         public Dispatcher(IRequestParser parser, IConHostFactory conHostFactory,  ILogger<Dispatcher> logger)
@@ -66,7 +68,7 @@ namespace MissionControl.Host.Core
                     // send syntax error back?
                     return new ErrorResponse("Command not found");
                 }
-                
+
                 return await registration.ConHost.Execute(command.Value);
             }
             catch (Exception e)
