@@ -46,7 +46,7 @@ namespace MissionControl.Host.Core
             waitingRequests.Enqueue(completionSource);
 
             var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            cancellationTokenSource.Token.Register(() => completionSource.SetCanceled());
+            cancellationTokenSource.Token.Register(() => completionSource.SetResult(null));
 
             return await completionSource.Task;
         }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MissionControl.Host.Core.Contracts;
@@ -35,8 +36,10 @@ namespace MissionControl.Host.Core
             _serviceFactory = Guard.NotNull(serviceFactory, nameof(serviceFactory));
             _logger = Guard.NotNull(logger, nameof(logger));
             ClientId = clientId;
-            
-            Task.Run(ProcessInbox);
+
+            var thread = new Thread(ProcessInbox) { IsBackground = true, Name = "Client-" + clientId };
+            thread.Start();
+            //Task.Run(ProcessInbox);
         }
 
         public Task<CliResponse> Execute(CliCommand command)
@@ -53,7 +56,7 @@ namespace MissionControl.Host.Core
             return completionSource.Task;
         }
 
-        private async Task ProcessInbox()
+        private async void ProcessInbox()
         {
             _logger.LogDebug("Started processing ConHost commands");
             foreach (var request in _inbox.GetConsumingEnumerable())
