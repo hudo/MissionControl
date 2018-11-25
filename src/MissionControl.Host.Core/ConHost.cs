@@ -31,6 +31,8 @@ namespace MissionControl.Host.Core
 
         public string ClientId { get;  }
 
+        private OutputBuffer _buffer = new OutputBuffer(); // todo: ioc
+
         public ConHost(string clientId, ServiceFactory serviceFactory, ILogger<ConHost> logger)
         {
             _serviceFactory = Guard.NotNull(serviceFactory, nameof(serviceFactory));
@@ -74,9 +76,17 @@ namespace MissionControl.Host.Core
                     
                     stopwatch.Stop();
                     _logger.LogInformation($"Command [{cmdName}] executed in {stopwatch.ElapsedMilliseconds}ms");
-                    
-                    request.completionSource.SetResult(response);
-                    
+
+                    if (response is MultipleResponses)
+                    {
+                        // switch to buffered responses   
+                        _buffer.Send(response);
+                    }
+                    else
+                    {
+                        request.completionSource.SetResult(response);
+                    }
+
                     Record(request.command);
                 }
                 catch (Exception e)

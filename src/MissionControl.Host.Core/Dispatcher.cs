@@ -22,8 +22,6 @@ namespace MissionControl.Host.Core
         private static readonly object Lock = new object();
         private readonly Timer _timer;
         
-        private OutputBuffer _outputBuffer = new OutputBuffer();
-
         private readonly List<ConHostRegistration> _hostsRegistrations = new List<ConHostRegistration>();
 
         public Dispatcher(IRequestParser parser, IConHostFactory conHostFactory,  ILogger<Dispatcher> logger)
@@ -71,9 +69,7 @@ namespace MissionControl.Host.Core
                 }
                 
                 var response = await registration.ConHost.Execute(command.Value);
-                
-                _outputBuffer.Send(response);
-                return await _outputBuffer.GetNextResponse(response.ClientId);
+                return response;
             }
             catch (Exception e)
             {

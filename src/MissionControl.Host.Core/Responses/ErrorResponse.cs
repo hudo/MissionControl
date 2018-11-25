@@ -8,6 +8,7 @@ namespace MissionControl.Host.Core.Responses
         {
             Content = message;
             StatusCode = HttpStatusCode.BadRequest;
+            IsDone = true;
         }
 
         public override string Type => "error";
