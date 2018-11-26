@@ -22,6 +22,7 @@ namespace MissionControl.Host.AspnetCore.Routes
             { ".png", "image/png" },
             { ".jpg", "image/jpeg" },
             { ".gif", "image/gif" },
+            { ".svg", "image/svg+xml" },
         };
 
         public StaticContentRoute(Assembly assembly) : base("")
