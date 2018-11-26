@@ -116,10 +116,7 @@ var ViewModel = /** @class */ (function () {
             .send(command, args)
             .then(function (resp) {
             console.log(resp);
-            _this.view.innerHTML += "<div class='row'><div class='inner'>"
-                + input + "<br/>"
-                + resp.content.replace(/\r?\n/g, "<br/>")
-                + "<div></div>";
+            _this.view.innerHTML += "<div class='row'><div class='inner output " + resp.type + "'>\n                    <p class='cmd'>" + input + "</p><div class='content'>" + resp.content.replace(/\r?\n/g, '<br/>') + "</div></div>\n                </div>";
         });
     };
     return ViewModel;
