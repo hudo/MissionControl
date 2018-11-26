@@ -45,8 +45,9 @@ namespace MissionControl.Host.Core
             var waitingRequests = WaitingItemsByClientId(_waitingRequests, clientId);
             waitingRequests.Enqueue(completionSource);
 
+            // cancel the request after 5 seconds, let client retry again
             var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            cancellationTokenSource.Token.Register(() => completionSource.SetResult(null));
+            cancellationTokenSource.Token.Register(() => completionSource.SetResult(new MultipartUpdateResponse(false, null, clientId)));
 
             return await completionSource.Task;
         }

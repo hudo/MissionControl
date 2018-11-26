@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using MissionControl.Host.Core.Contracts;
 using MissionControl.Host.Core.Pipeline;
 using MissionControl.Host.Core.Responses;
+using MissionControl.Host.Core.StandardCommands;
 using MissionControl.Host.Core.Utilities;
 using Newtonsoft.Json;
 
@@ -31,8 +32,9 @@ namespace MissionControl.Host.Core
         private readonly List<CliCommand> _history = new List<CliCommand>();
 
         public string ClientId { get;  }
-
-        private OutputBuffer _buffer = new OutputBuffer(); // todo: ioc
+        
+        // todo: how to handle services in cluster, if multipart update request arrives to different node?
+        private readonly OutputBuffer _buffer = new OutputBuffer(); // todo: ioc
 
         public ConHost(string clientId, ServiceFactory serviceFactory, ILogger<ConHost> logger)
         {
@@ -42,21 +44,27 @@ namespace MissionControl.Host.Core
 
             var thread = new Thread(ProcessInbox) { IsBackground = true, Name = "Client-" + clientId };
             thread.Start();
-            //Task.Run(ProcessInbox);
         }
 
         public Task<CliResponse> Execute(CliCommand command)
         { 
             if (_inbox.IsAddingCompleted)
-                throw new ApplicationException("ConHost stopped"); 
-            
-            var completionSource = new TaskCompletionSource<CliResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
-            
-            _inbox.Add((command, completionSource));
-            
-            _logger.LogDebug($"Command [{command.GetType().Name}] scheduled for processing: {JsonConvert.SerializeObject(command)}");
-            
-            return completionSource.Task;
+                throw new ApplicationException("ConHost stopped");
+
+            if (command is MultipartUpdateCommand)
+            {
+                return _buffer.GetNextResponse(command.ClientId);
+            }
+            else
+            {
+                var completionSource = new TaskCompletionSource<CliResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+                _inbox.Add((command, completionSource));
+
+                _logger.LogDebug($"Command [{command.GetType().Name}] scheduled for processing: {JsonConvert.SerializeObject(command)}");
+
+                return completionSource.Task;
+            }
         }
 
         private async void ProcessInbox()
