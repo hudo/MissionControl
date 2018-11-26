@@ -121,7 +121,7 @@ Typescript
 
 https://www.nuget.org/packages/MissionControl
 
-[Release Notes](https://github.com/hudo/MissionControl/blob/master/RELEASE-NOTES.md)
+[Release Notes](RELEASE-NOTES.md)
 
 ## Contributors
 
