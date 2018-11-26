@@ -22,6 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		azure-pipelines.yml = azure-pipelines.yml
 		README.md = README.md
 		RELEASE-NOTES.md = RELEASE-NOTES.md
+		docs\sequence-diagrams.MD = docs\sequence-diagrams.MD
 	EndProjectSection
 EndProject
 Global

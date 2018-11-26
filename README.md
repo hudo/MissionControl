@@ -157,3 +157,7 @@ Thanks [David Guerin](https://github.com/dguerin) for name idea!
 - [ ] DevOps: build, test and deployment pipeline
 - [ ] DevOps: automatic nuget release
 - [ ] DevOps: sample site deployment pipeline
+
+## Diagrams
+
+[Sequence diagrams](docs/sequence-diagrams.MD), use https://www.websequencediagrams.com/ to render.

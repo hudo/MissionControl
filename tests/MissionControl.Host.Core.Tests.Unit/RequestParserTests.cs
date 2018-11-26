@@ -104,7 +104,7 @@ namespace MissionControl.Host.Core.Tests.Unit
                 Args = new[] { "-CorrelationId=123" }
             });
 
-            command.Value.CorrelationId.ShouldBeNullOrEmpty();
+            command.Value.ClientId.ShouldBeNullOrEmpty();
         }
 
         [Fact]

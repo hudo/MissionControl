@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Async;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -77,10 +78,18 @@ namespace MissionControl.Host.Core
                     stopwatch.Stop();
                     _logger.LogInformation($"Command [{cmdName}] executed in {stopwatch.ElapsedMilliseconds}ms");
 
-                    if (response is MultipleResponses)
+                    if (response is MultipleResponses multipleResponses)
                     {
-                        // switch to buffered responses   
-                        _buffer.Send(response);
+                        // switch to buffered responses
+                        request.completionSource.SetResult(new SwitchToMultipartResponse());
+                        
+                        await multipleResponses.Responses().ForEachAsync((string rsp) =>
+                        {
+                            _buffer.Send(new MultipartUpdateResponse(false, rsp, request.command.ClientId));    
+                        });
+                        
+                        _buffer.Send(new MultipartUpdateResponse(true, null, request.command.ClientId));
+
                     }
                     else
                     {
