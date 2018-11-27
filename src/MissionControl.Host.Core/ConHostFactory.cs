@@ -8,7 +8,7 @@ namespace MissionControl.Host.Core
         IConHost Create(string clientId);
     }
 
-    internal class ConHostFactory : IConHostFactory
+    internal class ConHostFactory : IConHostFactory // todo: lame class, refactor this into ioc/di or something else!
     {
         private readonly ILogger<ConHost> _logger;
         private readonly ServiceFactory _serviceFactory;
@@ -21,7 +21,7 @@ namespace MissionControl.Host.Core
 
         public IConHost Create(string clientId)
         {
-            return new ConHost(clientId, _serviceFactory, _logger);
+            return new ConHost(clientId, _serviceFactory, _serviceFactory.GetInstance<OutputBuffer>(), _logger);
         }
     }
 }
