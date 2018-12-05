@@ -6,7 +6,6 @@
         {
             IsDone = isDone;
             Content = content;
-            ClientId = clientId;
         }
         
         public override string Type => "multipart-update";

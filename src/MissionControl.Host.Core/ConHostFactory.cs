@@ -21,7 +21,7 @@ namespace MissionControl.Host.Core
 
         public IConHost Create(string clientId)
         {
-            return new ConHost(clientId, _serviceFactory, _serviceFactory.GetInstance<OutputBuffer>(), _logger);
+            return new ConHost(clientId, _serviceFactory, _logger);
         }
     }
 }

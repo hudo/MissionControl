@@ -32,14 +32,10 @@ namespace MissionControl.Host.Core
         private readonly List<CliCommand> _history = new List<CliCommand>();
 
         public string ClientId { get;  }
-        
-        // todo: how to handle services in cluster, if multipart update request arrives to different node?
-        private readonly OutputBuffer _buffer; // todo: ioc
 
-        public ConHost(string clientId, ServiceFactory serviceFactory, OutputBuffer outputBuffer, ILogger<ConHost> logger)
+        public ConHost(string clientId, ServiceFactory serviceFactory, ILogger<ConHost> logger)
         {
             _serviceFactory = Guard.NotNull(serviceFactory, nameof(serviceFactory));
-            _buffer = Guard.NotNull(outputBuffer, nameof(outputBuffer));
             _logger = Guard.NotNull(logger, nameof(logger));
             ClientId = clientId;
 
@@ -54,18 +50,11 @@ namespace MissionControl.Host.Core
 
             _logger.LogDebug($"Command [{command.GetType().Name}] scheduled for processing: {JsonConvert.SerializeObject(command)}");
 
-            if (command is MultipartUpdateCommand)
-            {
-                return _buffer.GetNextResponse(command.ClientId);
-            }
-            else
-            {
-                var completionSource = new TaskCompletionSource<CliResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var completionSource = new TaskCompletionSource<CliResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-                _inbox.Add((command, completionSource));
+            _inbox.Add((command, completionSource));
 
-                return completionSource.Task;
-            }
+            return completionSource.Task;
         }
 
         private async void ProcessInbox()
@@ -87,26 +76,7 @@ namespace MissionControl.Host.Core
                     stopwatch.Stop();
                     _logger.LogInformation($"Command [{cmdName}] executed in {stopwatch.ElapsedMilliseconds}ms");
 
-                    if (response is MultipleResponses multipleResponses)
-                    {
-                        _logger.LogTrace("Switching to multipart response");
-                        // switch to buffered responses
-                        request.completionSource.SetResult(new SwitchToMultipartResponse());
-                        
-                        await multipleResponses.Responses().ForEachAsync((string rsp) =>
-                        {
-                            _logger.LogTrace("Multipart response received: " + response);
-                            _buffer.Send(new MultipartUpdateResponse(false, rsp, request.command.ClientId));    
-                        });
-                        
-                        _logger.LogTrace("Multipart last empty message sending");
-                        _buffer.Send(new MultipartUpdateResponse(true, null, request.command.ClientId));
-
-                    }
-                    else
-                    {
-                        request.completionSource.SetResult(response);
-                    }
+                    request.completionSource.SetResult(response);
 
                     Record(request.command);
                 }

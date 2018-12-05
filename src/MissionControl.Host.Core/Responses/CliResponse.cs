@@ -10,8 +10,6 @@ namespace MissionControl.Host.Core.Responses
             StatusCode = HttpStatusCode.OK;
         }
         
-        public string ClientId { get; set; }
-
         public string Content { get; set; }
 
         public HttpStatusCode StatusCode { get; set; }
