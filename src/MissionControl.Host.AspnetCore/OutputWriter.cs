@@ -18,6 +18,7 @@ namespace MissionControl.Host.AspnetCore
                 await multipleResponses.Responses().ForEachAsync(async payload =>
                 {
                     await httpResponse.WriteAsync(Json(new StreamingResponse(payload, false)));
+                    await httpResponse.Body.FlushAsync();
                 });
 
                 await httpResponse.WriteAsync(Json(new StreamingResponse(null, true)));

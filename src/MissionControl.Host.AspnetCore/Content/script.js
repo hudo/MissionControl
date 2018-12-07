@@ -77,7 +77,7 @@ var Parser = /** @class */ (function () {
     function Parser() {
     }
     Parser.prototype.getArgs = function (text) {
-        var args = new Array();
+        var args = [];
         var parts = text.split(" ");
         parts.forEach(function (part) {
             var arg = part.split("=");

@@ -1,7 +1,6 @@
 interface ICliResponse {
     type: string;
     content: string;
-    clientId: string;
     statusCode: number;
 }
 
@@ -27,6 +26,7 @@ class HostService {
             })
         });
 
+
         const response: ICliResponse = await data.json();
         return response;
     }
@@ -34,7 +34,7 @@ class HostService {
 
 class Parser {
     getArgs(text: string): Array<Arg> {
-        const args = new Array<Arg>();
+        const args = [];
         const parts = text.split(" ");    
         parts.forEach(part => {
             const arg = part.split("=");
@@ -95,3 +95,4 @@ window.onload = () => {
         <HTMLDivElement>document.getElementById("cli-view"))
         .init();
 };
+
