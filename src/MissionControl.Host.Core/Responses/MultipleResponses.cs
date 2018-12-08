@@ -17,7 +17,6 @@ namespace MissionControl.Host.Core.Responses
         public IAsyncEnumerable<string> Responses()
         {
             return new AsyncEnumerable<string>(_responses);
-            
         }
         
         public override string Type => "multipart";

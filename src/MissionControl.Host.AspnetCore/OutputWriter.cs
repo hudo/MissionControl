@@ -20,8 +20,6 @@ namespace MissionControl.Host.AspnetCore
                     await httpResponse.WriteAsync(Json(new StreamingResponse(payload, false)));
                     await httpResponse.Body.FlushAsync();
                 });
-
-                await httpResponse.WriteAsync(Json(new StreamingResponse(null, true)));
             }
             else
             {

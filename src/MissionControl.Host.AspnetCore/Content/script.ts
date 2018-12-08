@@ -14,11 +14,11 @@ class Arg {
 }
 
 class HostService {
-    async send(cmd: string, args: Array<Arg>) : Promise<ICliResponse> {    
+    async send(cmd: string, args: Array<Arg>, print: (x:string) => void) {    
         let headerArgs = "";
         for (let item of args) headerArgs += item.key + "=" + item.val + ";";
 
-        const data = await fetch("mc/cmd/" + cmd, {
+        const response = await fetch("mc/cmd/" + cmd, {
             method : "POST",
             headers : new Headers({
                 "mc.id" : "123",
@@ -26,9 +26,27 @@ class HostService {
             })
         });
 
+        const reader = response.body.getReader();
+        // @ts-ignore
+        const stream = new ReadableStream({ start() {
+            function push() {
+                reader.read().then(({done, value}) => {
+                    if (done) {
+                        return;
+                    }
+                    let item = <ICliResponse>JSON.parse(new TextDecoder("utf-8").decode(value));
+                    if (item.content !== "")
+                        print(item.content + "<br/>");
 
-        const response: ICliResponse = await data.json();
-        return response;
+                    push();
+                });
+            }
+            push();
+        }});
+
+
+        //const response: ICliResponse = await data.json();
+        //return response;
     }
 }
 
@@ -76,15 +94,12 @@ class ViewModel {
         const command = this.parser.getCommand(input);
         const args = this.parser.getArgs(input);
 
+        this.view.innerHTML += "<div class='row'><div class='inner'>" + input + "<br/></div></div>";
+        let inners = document.getElementsByClassName("inner");
+        let last = inners[inners.length - 1];
+
         this.hostService
-            .send(command, args)
-            .then((resp) => {
-                console.log(resp);
-                this.view.innerHTML += "<div class='row'><div class='inner'>" 
-                    + input + "<br/>" 
-                    + resp.content.replace(/\r?\n/g, "<br/>") 
-                    + "<div></div>";
-            });
+            .send(command, args, txt =>  last.innerHTML += txt.replace(/\r?\n/g, "<br/>"));
     }
 }
 
