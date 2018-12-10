@@ -45,7 +45,7 @@ var HostService = /** @class */ (function () {
     }
     HostService.prototype.send = function (cmd, args, print, finish) {
         return __awaiter(this, void 0, void 0, function () {
-            var headerArgs, _i, args_1, item, response, reader, json, stream;
+            var headerArgs, _i, args_1, item, fetchResponse, reader, response, cursor, stream;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -62,9 +62,10 @@ var HostService = /** @class */ (function () {
                                 })
                             })];
                     case 1:
-                        response = _a.sent();
-                        reader = response.body.getReader();
-                        json = "";
+                        fetchResponse = _a.sent();
+                        reader = fetchResponse.body.getReader();
+                        response = "";
+                        cursor = 0;
                         stream = new ReadableStream({ start: function () {
                                 function push() {
                                     reader.read().then(function (_a) {
@@ -75,15 +76,21 @@ var HostService = /** @class */ (function () {
                                         }
                                         var chunk = new TextDecoder("utf-8").decode(value);
                                         console.log("Received chunk: " + chunk);
-                                        json += chunk;
-                                        try {
-                                            var item = JSON.parse(json);
-                                            if (item.content !== "")
-                                                print(item.content + "<br/>");
-                                            json = "";
-                                        }
-                                        catch (e) {
-                                            console.log("Error parsing json, waiting for the next chunk");
+                                        response += chunk;
+                                        var begin = response.indexOf("BEGIN>>", cursor);
+                                        var end = response.indexOf("<<END", cursor);
+                                        if (begin > -1 && end > -1) {
+                                            try {
+                                                var json = response.substring(begin + 7, end);
+                                                console.log("Trying to parse: " + json);
+                                                var item = JSON.parse(json);
+                                                if (item.content !== "")
+                                                    print(item.content + "<br/>");
+                                                cursor = end + 1;
+                                            }
+                                            catch (e) {
+                                                console.log("Error parsing json, waiting for the next chunk");
+                                            }
                                         }
                                         push();
                                     });

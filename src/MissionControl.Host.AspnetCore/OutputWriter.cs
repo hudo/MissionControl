@@ -11,19 +11,23 @@ namespace MissionControl.Host.AspnetCore
     
     internal static class HttpOutputWriter
     {
+        private const string Begin = "BEGIN>>";
+        private const string End = "<<END";
+        
         public static async Task Write(CliResponse cliResponse, HttpResponse httpResponse)
         {
             if (cliResponse is MultipleResponses multipleResponses)
             {
                 await multipleResponses.Responses().ForEachAsync(async payload =>
                 {
-                    await httpResponse.WriteAsync(Json(new StreamingResponse(payload, false)));
+                    var json = Json(new StreamingResponse(payload, false));
+                    await httpResponse.WriteAsync(Begin + json + End);
                     await httpResponse.Body.FlushAsync();
                 });
             }
             else
             {
-                await httpResponse.WriteAsync(Json(cliResponse));
+                await httpResponse.WriteAsync(Begin + Json(cliResponse) + End);
             }
         }
         

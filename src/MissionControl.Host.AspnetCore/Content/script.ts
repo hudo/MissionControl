@@ -18,7 +18,7 @@ class HostService {
         let headerArgs = "";
         for (let item of args) headerArgs += item.key + "=" + item.val + ";";
 
-        const response = await fetch("mc/cmd/" + cmd, {
+        const fetchResponse = await fetch("mc/cmd/" + cmd, {
             method : "POST",
             headers : new Headers({
                 "mc.id" : "123",
@@ -26,8 +26,9 @@ class HostService {
             })
         });
 
-        const reader = response.body.getReader();
-        let json = "";
+        const reader = fetchResponse.body.getReader();
+        let response = "";
+        let cursor = 0;
         
         // @ts-ignore
         const stream = new ReadableStream({ start() {
@@ -40,17 +41,27 @@ class HostService {
                     
                     let chunk = new TextDecoder("utf-8").decode(value);
                     console.log("Received chunk: " + chunk);
-                    json += chunk;
+                    response += chunk;
                     
-                    try {
-                        let item = <ICliResponse>JSON.parse(json);
-                        if (item.content !== "")
-                            print(item.content + "<br/>");
-                        
-                        json = "";
-                    }
-                    catch(e) {
-                        console.log("Error parsing json, waiting for the next chunk")
+                    let begin = response.indexOf("BEGIN>>", cursor);
+                    let end = response.indexOf("<<END", cursor);
+                    
+                    if (begin > -1 && end > -1) {
+                        try {
+                            
+                            let json = response.substring(begin + 7, end);
+                            
+                            console.log("Trying to parse: " + json);
+                            
+                            let item = <ICliResponse>JSON.parse(json);
+                            if (item.content !== "")
+                                print(item.content + "<br/>");
+
+                            cursor = end + 1;
+                        }
+                        catch (e) {
+                            console.log("Error parsing json, waiting for the next chunk")
+                        }
                     }
 
                     push();
