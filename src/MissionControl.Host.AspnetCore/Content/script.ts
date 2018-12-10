@@ -35,7 +35,9 @@ class HostService {
                         finish();
                         return;
                     }
-                    let item = <ICliResponse>JSON.parse(new TextDecoder("utf-8").decode(value));
+                    let json = new TextDecoder("utf-8").decode(value);
+                    console.log("Received chunk: " + json);
+                    let item = <ICliResponse>JSON.parse(json);
                     if (item.content !== "")
                         print(item.content + "<br/>");
 

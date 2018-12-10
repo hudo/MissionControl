@@ -72,7 +72,9 @@ var HostService = /** @class */ (function () {
                                             finish();
                                             return;
                                         }
-                                        var item = JSON.parse(new TextDecoder("utf-8").decode(value));
+                                        var json = new TextDecoder("utf-8").decode(value);
+                                        console.log("Received chunk: " + json);
+                                        var item = JSON.parse(json);
                                         if (item.content !== "")
                                             print(item.content + "<br/>");
                                         push();
