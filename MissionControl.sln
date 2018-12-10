@@ -9,20 +9,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E2B99DDE-5FC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{18215C6B-9B4A-46C7-AC52-266D28F710A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissionControl.Host.Core.Tests.Unit", "tests\MissionControl.Host.Core.Tests.Unit\MissionControl.Host.Core.Tests.Unit.csproj", "{881B0083-859D-48E5-8F46-85E93A8F4664}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MissionControl.Host.Core.Tests.Unit", "tests\MissionControl.Host.Core.Tests.Unit\MissionControl.Host.Core.Tests.Unit.csproj", "{881B0083-859D-48E5-8F46-85E93A8F4664}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissionControl.Host.AspnetCore", "src\MissionControl.Host.AspnetCore\MissionControl.Host.AspnetCore.csproj", "{4E799DFD-2A89-4386-8689-DC1130C0EC78}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MissionControl.Host.AspnetCore", "src\MissionControl.Host.AspnetCore\MissionControl.Host.AspnetCore.csproj", "{4E799DFD-2A89-4386-8689-DC1130C0EC78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "tests\SampleApp\SampleApp.csproj", "{45625272-ACDA-41B7-A565-43135C1EBA80}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleApp", "tests\SampleApp\SampleApp.csproj", "{45625272-ACDA-41B7-A565-43135C1EBA80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissionControl.Host.AspnetCore.Tests.Integration", "tests\MissionControl.Host.AspnetCore.Tests.Integration\MissionControl.Host.AspnetCore.Tests.Integration.csproj", "{1C90F913-0E99-4A62-95BE-509EF21D3FBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MissionControl.Host.AspnetCore.Tests.Integration", "tests\MissionControl.Host.AspnetCore.Tests.Integration\MissionControl.Host.AspnetCore.Tests.Integration.csproj", "{1C90F913-0E99-4A62-95BE-509EF21D3FBD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{5D09B453-683E-4A82-BBB2-3F8068F1AB70}"
-ProjectSection(SolutionItems) = preProject
-	README.md = README.md
-	azure-pipelines.yml = azure-pipelines.yml
-	RELEASE-NOTES.md = RELEASE-NOTES.md
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		azure-pipelines.yml = azure-pipelines.yml
+		README.md = README.md
+		RELEASE-NOTES.md = RELEASE-NOTES.md
+		docs\sequence-diagrams.MD = docs\sequence-diagrams.MD
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

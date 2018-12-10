@@ -8,8 +8,6 @@ using Microsoft.AspNetCore.Http;
 using MissionControl.Host.Core;
 using MissionControl.Host.Core.Responses;
 using MissionControl.Host.Core.Utilities;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace MissionControl.Host.AspnetCore.Routes
 {
@@ -23,10 +21,12 @@ namespace MissionControl.Host.AspnetCore.Routes
         private const string CmdUrlPrefix = "cmd";
 
         private readonly IDispatcher _dispatcher;
-        
-        public CommandsRoute(IDispatcher dispatcher) : base("")
+        private readonly OutputWriter _outputWriter;
+
+        public CommandsRoute(IDispatcher dispatcher, OutputWriter outputWriter) : base("")
         {
             _dispatcher = dispatcher;
+            _outputWriter = outputWriter;
         }
 
         public override bool Match(string reqUri, string method)
@@ -48,10 +48,9 @@ namespace MissionControl.Host.AspnetCore.Routes
 
             if (!validationResult.isValid)
             {
-                cliResponse = new ErrorResponse(string.Join(", ", validationResult.errors))
-                {
-                    StatusCode = HttpStatusCode.ExpectationFailed
-                };
+                cliResponse = new ErrorResponse(
+                    string.Join(", ", validationResult.errors), 
+                    HttpStatusCode.ExpectationFailed);
             }
             else
             {
@@ -68,9 +67,8 @@ namespace MissionControl.Host.AspnetCore.Routes
             }
 
             httpResponse.StatusCode = (int)cliResponse.StatusCode;
-            cliResponse.TerminalId = clientId;
 
-            await httpResponse.WriteAsync(Json(cliResponse)); 
+            await _outputWriter(cliResponse, httpResponse);
         }
 
         
@@ -110,14 +108,6 @@ namespace MissionControl.Host.AspnetCore.Routes
             
             return (!errors.Any(), errors);
         }
-
-        private static string Json(object obj) => JsonConvert.SerializeObject(obj, JsonSettings);
         
-        private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
-        {
-            NullValueHandling = NullValueHandling.Ignore,
-            Formatting = Formatting.Indented,
-            ContractResolver = new CamelCasePropertyNamesContractResolver()
-        };
     }
 }

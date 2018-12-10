@@ -43,9 +43,9 @@ var Arg = /** @class */ (function () {
 var HostService = /** @class */ (function () {
     function HostService() {
     }
-    HostService.prototype.send = function (cmd, args) {
+    HostService.prototype.send = function (cmd, args, print, done) {
         return __awaiter(this, void 0, void 0, function () {
-            var headerArgs, _i, args_1, item, data, response;
+            var headerArgs, _i, args_1, item, response, reader, stream;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -62,11 +62,25 @@ var HostService = /** @class */ (function () {
                                 })
                             })];
                     case 1:
-                        data = _a.sent();
-                        return [4 /*yield*/, data.json()];
-                    case 2:
                         response = _a.sent();
-                        return [2 /*return*/, response];
+                        reader = response.body.getReader();
+                        stream = new ReadableStream({ start: function () {
+                                function push() {
+                                    reader.read().then(function (_a) {
+                                        var done = _a.done, value = _a.value;
+                                        if (done) {
+                                            done();
+                                            return;
+                                        }
+                                        var item = JSON.parse(new TextDecoder("utf-8").decode(value));
+                                        if (item.content !== "")
+                                            print(item.content + "<br/>");
+                                        push();
+                                    });
+                                }
+                                push();
+                            } });
+                        return [2 /*return*/];
                 }
             });
         });
@@ -77,7 +91,7 @@ var Parser = /** @class */ (function () {
     function Parser() {
     }
     Parser.prototype.getArgs = function (text) {
-        var args = new Array();
+        var args = [];
         var parts = text.split(" ");
         parts.forEach(function (part) {
             var arg = part.split("=");
@@ -108,18 +122,28 @@ var ViewModel = /** @class */ (function () {
         });
     };
     ViewModel.prototype.onExecute = function (e) {
-        var _this = this;
-        var input = this.input.value;
-        var command = this.parser.getCommand(input);
-        var args = this.parser.getArgs(input);
-        this.hostService
-            .send(command, args)
-            .then(function (resp) {
-            console.log(resp);
-            _this.view.innerHTML += "<div class='row'><div class='inner'>"
-                + input + "<br/>"
-                + resp.content.replace(/\r?\n/g, "<br/>")
-                + "<div></div>";
+        return __awaiter(this, void 0, void 0, function () {
+            var input, command, args, inners, last;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        input = this.input.value;
+                        command = this.parser.getCommand(input);
+                        args = this.parser.getArgs(input);
+                        this.view.innerHTML += "<div class='row'><div class='inner'>" + input + "<br/></div></div>";
+                        inners = document.getElementsByClassName("inner");
+                        last = inners[inners.length - 1];
+                        this.input.disabled = true;
+                        return [4 /*yield*/, this.hostService.send(command, args, function (txt) { return last.innerHTML += txt.replace(/\r?\n/g, "<br/>"); }, function () {
+                                _this.input.disabled = false;
+                                _this.input.focus();
+                            })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
         });
     };
     return ViewModel;
