@@ -43,7 +43,7 @@ var Arg = /** @class */ (function () {
 var HostService = /** @class */ (function () {
     function HostService() {
     }
-    HostService.prototype.send = function (cmd, args, print, done) {
+    HostService.prototype.send = function (cmd, args, print, finish) {
         return __awaiter(this, void 0, void 0, function () {
             var headerArgs, _i, args_1, item, response, reader, stream;
             return __generator(this, function (_a) {
@@ -69,7 +69,7 @@ var HostService = /** @class */ (function () {
                                     reader.read().then(function (_a) {
                                         var done = _a.done, value = _a.value;
                                         if (done) {
-                                            done();
+                                            finish();
                                             return;
                                         }
                                         var item = JSON.parse(new TextDecoder("utf-8").decode(value));

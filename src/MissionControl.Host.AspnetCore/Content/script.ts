@@ -14,7 +14,7 @@ class Arg {
 }
 
 class HostService {
-    async send(cmd: string, args: Array<Arg>, print: (x:string) => void, done: () => void) {    
+    async send(cmd: string, args: Array<Arg>, print: (x:string) => void, finish: () => void) {    
         let headerArgs = "";
         for (let item of args) headerArgs += item.key + "=" + item.val + ";";
 
@@ -32,7 +32,7 @@ class HostService {
             function push() {
                 reader.read().then(({done, value}) => {
                     if (done) {
-                        done();
+                        finish();
                         return;
                     }
                     let item = <ICliResponse>JSON.parse(new TextDecoder("utf-8").decode(value));
@@ -96,7 +96,7 @@ class ViewModel {
         let last = inners[inners.length - 1];
 
         this.input.disabled = true;
-        await this.hostService.send(command, args, 
+        await this.hostService.send(command, args,  
             txt => last.innerHTML += txt.replace(/\r?\n/g, "<br/>"),
             () => {
                 this.input.disabled = false;
