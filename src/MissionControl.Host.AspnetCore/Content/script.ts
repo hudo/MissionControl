@@ -27,6 +27,8 @@ class HostService {
         });
 
         const reader = response.body.getReader();
+        let json = "";
+        
         // @ts-ignore
         const stream = new ReadableStream({ start() {
             function push() {
@@ -35,11 +37,21 @@ class HostService {
                         finish();
                         return;
                     }
-                    let json = new TextDecoder("utf-8").decode(value);
-                    console.log("Received chunk: " + json);
-                    let item = <ICliResponse>JSON.parse(json);
-                    if (item.content !== "")
-                        print(item.content + "<br/>");
+                    
+                    let chunk = new TextDecoder("utf-8").decode(value);
+                    console.log("Received chunk: " + chunk);
+                    json += chunk;
+                    
+                    try {
+                        let item = <ICliResponse>JSON.parse(json);
+                        if (item.content !== "")
+                            print(item.content + "<br/>");
+                        
+                        json = "";
+                    }
+                    catch(e) {
+                        console.log("Error parsing json, waiting for the next chunk")
+                    }
 
                     push();
                 });

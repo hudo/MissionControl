@@ -45,7 +45,7 @@ var HostService = /** @class */ (function () {
     }
     HostService.prototype.send = function (cmd, args, print, finish) {
         return __awaiter(this, void 0, void 0, function () {
-            var headerArgs, _i, args_1, item, response, reader, stream;
+            var headerArgs, _i, args_1, item, response, reader, json, stream;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -64,6 +64,7 @@ var HostService = /** @class */ (function () {
                     case 1:
                         response = _a.sent();
                         reader = response.body.getReader();
+                        json = "";
                         stream = new ReadableStream({ start: function () {
                                 function push() {
                                     reader.read().then(function (_a) {
@@ -72,11 +73,18 @@ var HostService = /** @class */ (function () {
                                             finish();
                                             return;
                                         }
-                                        var json = new TextDecoder("utf-8").decode(value);
-                                        console.log("Received chunk: " + json);
-                                        var item = JSON.parse(json);
-                                        if (item.content !== "")
-                                            print(item.content + "<br/>");
+                                        var chunk = new TextDecoder("utf-8").decode(value);
+                                        console.log("Received chunk: " + chunk);
+                                        json += chunk;
+                                        try {
+                                            var item = JSON.parse(json);
+                                            if (item.content !== "")
+                                                print(item.content + "<br/>");
+                                            json = "";
+                                        }
+                                        catch (e) {
+                                            console.log("Error parsing json, waiting for the next chunk");
+                                        }
                                         push();
                                     });
                                 }
