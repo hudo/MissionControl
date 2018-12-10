@@ -43,7 +43,7 @@ var Arg = /** @class */ (function () {
 var HostService = /** @class */ (function () {
     function HostService() {
     }
-    HostService.prototype.send = function (cmd, args, print) {
+    HostService.prototype.send = function (cmd, args, print, done) {
         return __awaiter(this, void 0, void 0, function () {
             var headerArgs, _i, args_1, item, response, reader, stream;
             return __generator(this, function (_a) {
@@ -69,6 +69,7 @@ var HostService = /** @class */ (function () {
                                     reader.read().then(function (_a) {
                                         var done = _a.done, value = _a.value;
                                         if (done) {
+                                            done();
                                             return;
                                         }
                                         var item = JSON.parse(new TextDecoder("utf-8").decode(value));
@@ -121,14 +122,29 @@ var ViewModel = /** @class */ (function () {
         });
     };
     ViewModel.prototype.onExecute = function (e) {
-        var input = this.input.value;
-        var command = this.parser.getCommand(input);
-        var args = this.parser.getArgs(input);
-        this.view.innerHTML += "<div class='row'><div class='inner'>" + input + "<br/></div></div>";
-        var inners = document.getElementsByClassName("inner");
-        var last = inners[inners.length - 1];
-        this.hostService
-            .send(command, args, function (txt) { return last.innerHTML += txt.replace(/\r?\n/g, "<br/>"); });
+        return __awaiter(this, void 0, void 0, function () {
+            var input, command, args, inners, last;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        input = this.input.value;
+                        command = this.parser.getCommand(input);
+                        args = this.parser.getArgs(input);
+                        this.view.innerHTML += "<div class='row'><div class='inner'>" + input + "<br/></div></div>";
+                        inners = document.getElementsByClassName("inner");
+                        last = inners[inners.length - 1];
+                        this.input.disabled = true;
+                        return [4 /*yield*/, this.hostService.send(command, args, function (txt) { return last.innerHTML += txt.replace(/\r?\n/g, "<br/>"); }, function () {
+                                _this.input.disabled = false;
+                                _this.input.focus();
+                            })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     return ViewModel;
 }());

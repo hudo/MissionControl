@@ -14,7 +14,7 @@ class Arg {
 }
 
 class HostService {
-    async send(cmd: string, args: Array<Arg>, print: (x:string) => void) {    
+    async send(cmd: string, args: Array<Arg>, print: (x:string) => void, done: () => void) {    
         let headerArgs = "";
         for (let item of args) headerArgs += item.key + "=" + item.val + ";";
 
@@ -32,6 +32,7 @@ class HostService {
             function push() {
                 reader.read().then(({done, value}) => {
                     if (done) {
+                        done();
                         return;
                     }
                     let item = <ICliResponse>JSON.parse(new TextDecoder("utf-8").decode(value));
@@ -43,10 +44,6 @@ class HostService {
             }
             push();
         }});
-
-
-        //const response: ICliResponse = await data.json();
-        //return response;
     }
 }
 
@@ -89,7 +86,7 @@ class ViewModel {
         });
     }
 
-    private onExecute(e:KeyboardEvent) {
+    private async onExecute(e: KeyboardEvent) {
         const input = this.input.value;
         const command = this.parser.getCommand(input);
         const args = this.parser.getArgs(input);
@@ -98,8 +95,13 @@ class ViewModel {
         let inners = document.getElementsByClassName("inner");
         let last = inners[inners.length - 1];
 
-        this.hostService
-            .send(command, args, txt =>  last.innerHTML += txt.replace(/\r?\n/g, "<br/>"));
+        this.input.disabled = true;
+        await this.hostService.send(command, args, 
+            txt => last.innerHTML += txt.replace(/\r?\n/g, "<br/>"),
+            () => {
+                this.input.disabled = false;
+                this.input.focus();    
+            });
     }
 }
 
