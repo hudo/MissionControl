@@ -19,7 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MissionControl.Host.AspnetC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{5D09B453-683E-4A82-BBB2-3F8068F1AB70}"
 	ProjectSection(SolutionItems) = preProject
-		azure-pipelines.yml = azure-pipelines.yml
 		README.md = README.md
 		RELEASE-NOTES.md = RELEASE-NOTES.md
 		docs\sequence-diagrams.MD = docs\sequence-diagrams.MD
