@@ -69,9 +69,13 @@ public void Configure(IApplicationBuilder app)
 }
 ```
 
+### Basic example
+
 Simple command and handler example: 
 
 ```csharp
+// Gets exposed to CLI as a command:
+// > say-hi -name=Batman -foo=123
 [CliCommand("say-hi", "Say Hi!")]
 public class SayHiCommand : CliCommand
 {
@@ -100,6 +104,49 @@ Invoked in CLI console with:
 ```
 > say-hi -name=Hackerman
 Computer says hi to Hackerman!
+> _
+```
+
+Available response types:
+- TextResponse
+- ErrorResponse
+- MultipleResponses
+
+### Multiple responses
+
+For multiple responses we can yield strings:
+```csharp
+[CliCommand("multi-resp", "Multiple responses example")]
+public class MultipleResponsesCommand : CliCommand {  }
+
+public class MultipleResponsesHandler : ICliCommandHandler<MultipleResponsesCommand>
+{
+    public async Task<CliResponse> Handle(MultipleResponsesCommand command)
+    {
+        await service.DoSomething();
+        
+        // here we can "stream" partial responses back to the CLI terminal
+        // use async callback in MultipleResponses constructor:
+        return new MultipleResponses(async yield =>
+        {
+            await yield.ReturnAsync("Response 1");
+            await Task.Delay(2000);
+            await yield.ReturnAsync("Response 2");
+            await Task.Delay(2000);
+            await yield.ReturnAsync("Response 3 - done.");
+        });
+    }
+}
+
+```
+
+CLI output, with 2sec delay between each response line:
+
+```
+> multi-resp
+Response 1
+Response 2
+Response 3 - done.
 > _
 ```
 
