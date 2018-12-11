@@ -1,6 +1,7 @@
 # MissionControl
 
 [![Nuget Package](https://badgen.net/nuget/v/missioncontrol)](https://www.nuget.org/packages/missioncontrol/)
+[![Build Status](https://dev.azure.com/hhudolet/MissionControl/_apis/build/status/MC%20Sample%20Web%20App%20Pipeline)](https://dev.azure.com/hhudolet/MissionControl/_build/latest?definitionId=2)
 
 CLI as a middleware for your web apps and microservices
 
