@@ -150,13 +150,13 @@ Thanks [David Guerin](https://github.com/dguerin) for name idea!
 - [ ] JS: get previous command (history)
 - [ ] JS: unit tests
 - [ ] control specific service instance in a cluster (epic)
-- [ ] workflows/sagas/muliple response objects (epic)
+- [x] workflows/sagas/muliple response objects (epic)
 - [ ] Refactor: argument parser (implement tokenizer)
 - [ ] Refactor: better command/handler contracts for easier/streamlined development
 - [x] Included commands: ping, list-commands, command help
-- [ ] DevOps: build, test and deployment pipeline
+- [x] DevOps: build, test and deployment pipeline
 - [ ] DevOps: automatic nuget release
-- [ ] DevOps: sample site deployment pipeline
+- [x] DevOps: sample site deployment pipeline
 
 ## Diagrams
 

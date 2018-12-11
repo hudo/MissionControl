@@ -14,6 +14,8 @@ namespace MissionControl.Host.Core.Tests.Unit
 {
     public class OutputWriterTests
     {
+        private static string Revert(string payload) => payload.Replace("BEGIN>>", "").Replace("<<END", "");
+
         [Fact]
         public async Task Write_multiple_responses()
         {
@@ -24,7 +26,7 @@ namespace MissionControl.Host.Core.Tests.Unit
                 .Setup(x => x.Body.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .Callback((byte[] payload, int _1, int _2, CancellationToken _3) =>
                 {
-                    responses.Add(JsonConvert.DeserializeObject<StreamResponse>(Encoding.UTF8.GetString(payload)));
+                    responses.Add(JsonConvert.DeserializeObject<StreamResponse>(Revert(Encoding.UTF8.GetString(payload))));
                 })
                 .Returns(Task.CompletedTask)
                 .Verifiable();
@@ -38,12 +40,11 @@ namespace MissionControl.Host.Core.Tests.Unit
             await HttpOutputWriter.Write(cliResponse, response.Object);
             
             response.Verify(x => x.Body.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), 
-                Times.Exactly(3));
+                Times.Exactly(2));
             
-            responses.Count.ShouldBe(3);
+            responses.Count.ShouldBe(2);
             responses[0].IsDone.ShouldBe(false);
             responses[1].IsDone.ShouldBe(false);
-            responses[2].IsDone.ShouldBe(true);
         }
 
         [Fact]
@@ -56,7 +57,7 @@ namespace MissionControl.Host.Core.Tests.Unit
                 .Setup(x => x.Body.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .Callback((byte[] payload, int _1, int _2, CancellationToken _3) =>
                 {
-                    responses.Add(JsonConvert.DeserializeObject<TextResponse>(Encoding.UTF8.GetString(payload)));
+                    responses.Add(JsonConvert.DeserializeObject<TextResponse>(Revert(Encoding.UTF8.GetString(payload))));
                 })
                 .Returns(Task.CompletedTask)
                 .Verifiable();

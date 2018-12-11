@@ -37,6 +37,8 @@ namespace MissionControl.Host.AspnetCore.Tests.Integration
             var response = await Post(url, args);
             var body = await response.Content.ReadAsStringAsync();
 
+            body = body.Replace("BEGIN>>", "").Replace("<<END", "");
+
             R item = default(R);
             if (!string.IsNullOrEmpty(body))
                 item = JsonConvert.DeserializeObject<R>(body);
