@@ -5,6 +5,8 @@
 
 CLI as a middleware for your web apps and microservices
 
+Example web site with MC console: https://mc-sample.azurewebsites.net/
+
 **UNDER DEVELOPMENT - alpha version**
 
 # Why
