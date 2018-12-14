@@ -90,7 +90,7 @@ class Parser {
 class ViewModel {
     input : HTMLTextAreaElement;
     view : HTMLDivElement;
-
+    
     parser : Parser;
     hostService : HostService;
     
@@ -102,6 +102,7 @@ class ViewModel {
     }
 
     init():void {
+        this.print(Resources.help);
         this.input.addEventListener("keypress", (e : KeyboardEvent) => {
             if (e.which === 13) {
                 this.onExecute(e);
@@ -110,13 +111,24 @@ class ViewModel {
             }
         });
     }
+    
+    print(text: string) : void {
+        this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";
+    }
 
     private async onExecute(e: KeyboardEvent) {
         const input = this.input.value;
         const command = this.parser.getCommand(input);
         const args = this.parser.getArgs(input);
-
-        this.view.innerHTML += "<div class='row'><div class='inner'>" + input + "<br/></div></div>";
+        
+        if (command === "help") {
+            this.print(Resources.help);
+            return;
+        }
+        
+        // add: cls, history
+        
+        this.print(input);
         let inners = document.getElementsByClassName("inner");
         let last = inners[inners.length - 1];
 
@@ -130,6 +142,11 @@ class ViewModel {
     }
 }
 
+class Resources {
+    static readonly help : string = "Some help to get you started:<br>\n" +
+        "<b>list-commands</b> will show a list for discovered commands in your app.<br>\n" +
+        "Add <b>--help</b> argument to see description and available parameters. ";
+}
 
 window.onload = () => {
     new ViewModel(

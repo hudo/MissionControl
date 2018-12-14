@@ -130,6 +130,7 @@ var ViewModel = /** @class */ (function () {
     }
     ViewModel.prototype.init = function () {
         var _this = this;
+        this.print(Resources.help);
         this.input.addEventListener("keypress", function (e) {
             if (e.which === 13) {
                 _this.onExecute(e);
@@ -137,6 +138,9 @@ var ViewModel = /** @class */ (function () {
                 e.preventDefault();
             }
         });
+    };
+    ViewModel.prototype.print = function (text) {
+        this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";
     };
     ViewModel.prototype.onExecute = function (e) {
         return __awaiter(this, void 0, void 0, function () {
@@ -148,7 +152,12 @@ var ViewModel = /** @class */ (function () {
                         input = this.input.value;
                         command = this.parser.getCommand(input);
                         args = this.parser.getArgs(input);
-                        this.view.innerHTML += "<div class='row'><div class='inner'>" + input + "<br/></div></div>";
+                        if (command === "help") {
+                            this.print(Resources.help);
+                            return [2 /*return*/];
+                        }
+                        // add: cls, history
+                        this.print(input);
                         inners = document.getElementsByClassName("inner");
                         last = inners[inners.length - 1];
                         this.input.disabled = true;
@@ -164,6 +173,14 @@ var ViewModel = /** @class */ (function () {
         });
     };
     return ViewModel;
+}());
+var Resources = /** @class */ (function () {
+    function Resources() {
+    }
+    Resources.help = "Some help to get you started:<br>\n" +
+        "<b>list-commands</b> will show a list for discovered commands in your app.<br>\n" +
+        "Add <b>--help</b> argument to see description and available parameters. ";
+    return Resources;
 }());
 window.onload = function () {
     new ViewModel(document.getElementById("cli-input"), document.getElementById("cli-view"))
