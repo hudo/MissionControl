@@ -40,7 +40,7 @@ class HostService {
                     }
                     
                     let chunk = new TextDecoder("utf-8").decode(value);
-                    console.log("Received chunk: " + chunk);
+                    //console.log("Received chunk: " + chunk);
                     response += chunk;
                     
                     let begin = response.indexOf("BEGIN>>", cursor);
@@ -51,7 +51,7 @@ class HostService {
                             
                             let json = response.substring(begin + 7, end);
                             
-                            console.log("Trying to parse: " + json);
+                            //console.log("Trying to parse: " + json);
                             
                             let item = <ICliResponse>JSON.parse(json);
                             if (item.content !== "")
@@ -60,7 +60,7 @@ class HostService {
                             cursor = end + 1;
                         }
                         catch (e) {
-                            console.log("Error parsing json, waiting for the next chunk")
+                            //console.log("Error parsing json, waiting for the next chunk")
                         }
                     }
 
@@ -91,6 +91,9 @@ class ViewModel {
     input : HTMLTextAreaElement;
     view : HTMLDivElement;
     
+    history: Array<string> = [];
+    historyCursor: number = -1;
+    
     parser : Parser;
     hostService : HostService;
     
@@ -110,6 +113,29 @@ class ViewModel {
                 e.preventDefault();
             }
         });
+        this.input.addEventListener("keyup", (e:KeyboardEvent) => this.onKeyUpDown(e));
+        
+    }
+
+    private onKeyUpDown(e:KeyboardEvent) {
+        if (e.code != 'ArrowUp' && e.code != 'ArrowDown') return;
+
+        let isUp = e.code == "ArrowUp";
+        let isDown = !isUp;
+
+        if ((this.historyCursor == -1 && isDown) ||
+            ((this.historyCursor >= this.history.length-1) && isUp)) {
+            console.log("list history end. cursor: " + this.historyCursor);
+            return;
+        }
+
+        if (isUp) {
+            this.historyCursor += 1;
+        }
+        else
+            this.historyCursor -= 1;
+
+        this.input.value = this.history[this.history.length - 1 - this.historyCursor];
     }
     
     print(text: string) : void {
@@ -126,11 +152,12 @@ class ViewModel {
             return;
         }
         
-        // add: cls, history
-        
         this.print(input);
         let inners = document.getElementsByClassName("inner");
         let last = inners[inners.length - 1];
+        
+        this.history.push(input);
+        this.historyCursor = 0;
 
         this.input.disabled = true;
         await this.hostService.send(command, args,  
