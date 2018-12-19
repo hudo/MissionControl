@@ -117,25 +117,22 @@ class ViewModel {
         
     }
 
-    private onKeyUpDown(e:KeyboardEvent) {
-        if (e.code != 'ArrowUp' && e.code != 'ArrowDown') return;
+    private onKeyUpDown(e:KeyboardEvent) {        
+        if ((e.code != 'ArrowUp' && e.code != 'ArrowDown') || this.history.length == 0) {
+            return
+        };
 
         let isUp = e.code == "ArrowUp";
         let isDown = !isUp;
+        
+        this.input.value = this.history[this.historyCursor];
 
-        if ((this.historyCursor == -1 && isDown) ||
-            ((this.historyCursor >= this.history.length-1) && isUp)) {
-            console.log("list history end. cursor: " + this.historyCursor);
-            return;
+        if (isUp && this.historyCursor > 0) {
+            this.historyCursor -= 1;
         }
-
-        if (isUp) {
+        else if (isDown && this.historyCursor < this.history.length - 1) {
             this.historyCursor += 1;
         }
-        else
-            this.historyCursor -= 1;
-
-        this.input.value = this.history[this.history.length - 1 - this.historyCursor];
     }
     
     print(text: string) : void {
@@ -157,7 +154,7 @@ class ViewModel {
         let last = inners[inners.length - 1];
         
         this.history.push(input);
-        this.historyCursor = 0;
+        this.historyCursor = this.history.length - 1;
 
         this.input.disabled = true;
         await this.hostService.send(command, args,  

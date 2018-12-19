@@ -143,21 +143,19 @@ var ViewModel = /** @class */ (function () {
         this.input.addEventListener("keyup", function (e) { return _this.onKeyUpDown(e); });
     };
     ViewModel.prototype.onKeyUpDown = function (e) {
-        if (e.code != 'ArrowUp' && e.code != 'ArrowDown')
+        if ((e.code != 'ArrowUp' && e.code != 'ArrowDown') || this.history.length == 0) {
             return;
+        }
+        ;
         var isUp = e.code == "ArrowUp";
         var isDown = !isUp;
-        if ((this.historyCursor == -1 && isDown) ||
-            ((this.historyCursor >= this.history.length - 1) && isUp)) {
-            console.log("list history end. cursor: " + this.historyCursor);
-            return;
+        this.input.value = this.history[this.historyCursor];
+        if (isUp && this.historyCursor > 0) {
+            this.historyCursor -= 1;
         }
-        if (isUp) {
+        else if (isDown && this.historyCursor < this.history.length - 1) {
             this.historyCursor += 1;
         }
-        else
-            this.historyCursor -= 1;
-        this.input.value = this.history[this.history.length - 1 - this.historyCursor];
     };
     ViewModel.prototype.print = function (text) {
         this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";
@@ -180,7 +178,7 @@ var ViewModel = /** @class */ (function () {
                         inners = document.getElementsByClassName("inner");
                         last = inners[inners.length - 1];
                         this.history.push(input);
-                        this.historyCursor = 0;
+                        this.historyCursor = this.history.length - 1;
                         this.input.disabled = true;
                         return [4 /*yield*/, this.hostService.send(command, args, function (txt) { return last.innerHTML += txt.replace(/\r?\n/g, "<br/>"); }, function () {
                                 _this.input.disabled = false;
