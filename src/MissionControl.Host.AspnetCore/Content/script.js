@@ -41,7 +41,8 @@ var Arg = /** @class */ (function () {
     return Arg;
 }());
 var HostService = /** @class */ (function () {
-    function HostService() {
+    function HostService(termId) {
+        this.termId = termId;
     }
     HostService.prototype.send = function (cmd, args, print, finish) {
         return __awaiter(this, void 0, void 0, function () {
@@ -57,7 +58,7 @@ var HostService = /** @class */ (function () {
                         return [4 /*yield*/, fetch("mc/cmd/" + cmd, {
                                 method: "POST",
                                 headers: new Headers({
-                                    "mc.id": "123",
+                                    "mc.id": this.termId,
                                     "mc.args": headerArgs
                                 })
                             })];
@@ -128,7 +129,7 @@ var ViewModel = /** @class */ (function () {
         this.view = view;
         this.input = input;
         this.parser = new Parser();
-        this.hostService = new HostService();
+        this.hostService = new HostService(Utils.newGuid());
     }
     ViewModel.prototype.init = function () {
         var _this = this;
@@ -200,6 +201,17 @@ var Resources = /** @class */ (function () {
         "<b>list-commands</b> will show a list for discovered commands in your app.<br>\n" +
         "Add <b>--help</b> argument to see description and available parameters. ";
     return Resources;
+}());
+var Utils = /** @class */ (function () {
+    function Utils() {
+    }
+    Utils.newGuid = function () {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    };
+    return Utils;
 }());
 window.onload = function () {
     new ViewModel(document.getElementById("cli-input"), document.getElementById("cli-view"))
