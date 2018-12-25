@@ -148,9 +148,17 @@ class ViewModel {
         const input = this.input.value;
         const command = this.parser.getCommand(input);
         const args = this.parser.getArgs(input);
+
+        this.history.push(input);
+        this.historyCursor = this.history.length - 1;
         
         if (command === "help") {
             this.print(Resources.help);
+            return;
+        }
+
+        if(command === "cls") {
+            this.view.innerHTML = "";
             return;
         }
         
@@ -158,9 +166,6 @@ class ViewModel {
         let inners = document.getElementsByClassName("inner");
         let last = inners[inners.length - 1];
         
-        this.history.push(input);
-        this.historyCursor = this.history.length - 1;
-
         this.input.disabled = true;
         await this.hostService.send(command, args,  
             txt => last.innerHTML += txt.replace(/\r?\n/g, "<br/>"),

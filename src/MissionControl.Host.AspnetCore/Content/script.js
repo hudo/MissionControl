@@ -171,15 +171,19 @@ var ViewModel = /** @class */ (function () {
                         input = this.input.value;
                         command = this.parser.getCommand(input);
                         args = this.parser.getArgs(input);
+                        this.history.push(input);
+                        this.historyCursor = this.history.length - 1;
                         if (command === "help") {
                             this.print(Resources.help);
+                            return [2 /*return*/];
+                        }
+                        if (command === "cls") {
+                            this.view.innerHTML = "";
                             return [2 /*return*/];
                         }
                         this.print(input);
                         inners = document.getElementsByClassName("inner");
                         last = inners[inners.length - 1];
-                        this.history.push(input);
-                        this.historyCursor = this.history.length - 1;
                         this.input.disabled = true;
                         return [4 /*yield*/, this.hostService.send(command, args, function (txt) { return last.innerHTML += txt.replace(/\r?\n/g, "<br/>"); }, function () {
                                 _this.input.disabled = false;
