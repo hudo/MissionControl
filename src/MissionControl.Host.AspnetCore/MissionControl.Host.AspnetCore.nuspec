@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>MissionControl</id>
-    <version>0.9.0-alpha</version>
+    <version>0.9.1-alpha</version>
     <description>CLI web interface for your application as a middleware</description>
     <authors>Hrvoje Hudo</authors>
     <title>MissionControl: web CLI for you app</title>
