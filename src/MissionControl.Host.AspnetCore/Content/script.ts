@@ -14,6 +14,11 @@ class Arg {
 }
 
 class HostService {
+    termId:string;
+    constructor(termId:string) {
+        this.termId = termId;
+    }
+
     async send(cmd: string, args: Array<Arg>, print: (x:string) => void, finish: () => void) {    
         let headerArgs = "";
         for (let item of args) headerArgs += item.key + "=" + item.val + ";";
@@ -21,7 +26,7 @@ class HostService {
         const fetchResponse = await fetch("mc/cmd/" + cmd, {
             method : "POST",
             headers : new Headers({
-                "mc.id" : "123",
+                "mc.id" : this.termId,
                 "mc.args" : headerArgs
             })
         });
@@ -40,7 +45,7 @@ class HostService {
                     }
                     
                     let chunk = new TextDecoder("utf-8").decode(value);
-                    console.log("Received chunk: " + chunk);
+                    //console.log("Received chunk: " + chunk);
                     response += chunk;
                     
                     let begin = response.indexOf("BEGIN>>", cursor);
@@ -51,7 +56,7 @@ class HostService {
                             
                             let json = response.substring(begin + 7, end);
                             
-                            console.log("Trying to parse: " + json);
+                            //console.log("Trying to parse: " + json);
                             
                             let item = <ICliResponse>JSON.parse(json);
                             if (item.content !== "")
@@ -60,7 +65,7 @@ class HostService {
                             cursor = end + 1;
                         }
                         catch (e) {
-                            console.log("Error parsing json, waiting for the next chunk")
+                            //console.log("Error parsing json, waiting for the next chunk")
                         }
                     }
 
@@ -91,14 +96,17 @@ class ViewModel {
     input : HTMLTextAreaElement;
     view : HTMLDivElement;
     
+    history: Array<string> = [];
+    historyCursor: number = -1;
+    
     parser : Parser;
     hostService : HostService;
-    
+
     constructor(input: HTMLTextAreaElement, view : HTMLDivElement) {
         this.view = view;
         this.input = input;        
         this.parser = new Parser();
-        this.hostService = new HostService();
+        this.hostService = new HostService(Utils.newGuid());
     }
 
     init():void {
@@ -110,6 +118,26 @@ class ViewModel {
                 e.preventDefault();
             }
         });
+        this.input.addEventListener("keyup", (e:KeyboardEvent) => this.onKeyUpDown(e));
+        
+    }
+
+    private onKeyUpDown(e:KeyboardEvent) {        
+        if ((e.code != 'ArrowUp' && e.code != 'ArrowDown') || this.history.length == 0) {
+            return
+        };
+
+        let isUp = e.code == "ArrowUp";
+        let isDown = !isUp;
+        
+        this.input.value = this.history[this.historyCursor];
+
+        if (isUp && this.historyCursor > 0) {
+            this.historyCursor -= 1;
+        }
+        else if (isDown && this.historyCursor < this.history.length - 1) {
+            this.historyCursor += 1;
+        }
     }
     
     print(text: string) : void {
@@ -126,11 +154,12 @@ class ViewModel {
             return;
         }
         
-        // add: cls, history
-        
         this.print(input);
         let inners = document.getElementsByClassName("inner");
         let last = inners[inners.length - 1];
+        
+        this.history.push(input);
+        this.historyCursor = this.history.length - 1;
 
         this.input.disabled = true;
         await this.hostService.send(command, args,  
@@ -146,6 +175,15 @@ class Resources {
     static readonly help : string = "Some help to get you started:<br>\n" +
         "<b>list-commands</b> will show a list for discovered commands in your app.<br>\n" +
         "Add <b>--help</b> argument to see description and available parameters. ";
+}
+
+class Utils {
+    static newGuid() : string {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+            return v.toString(16);
+        });
+    }
 }
 
 window.onload = () => {

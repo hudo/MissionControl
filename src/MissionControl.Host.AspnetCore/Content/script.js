@@ -41,7 +41,8 @@ var Arg = /** @class */ (function () {
     return Arg;
 }());
 var HostService = /** @class */ (function () {
-    function HostService() {
+    function HostService(termId) {
+        this.termId = termId;
     }
     HostService.prototype.send = function (cmd, args, print, finish) {
         return __awaiter(this, void 0, void 0, function () {
@@ -57,7 +58,7 @@ var HostService = /** @class */ (function () {
                         return [4 /*yield*/, fetch("mc/cmd/" + cmd, {
                                 method: "POST",
                                 headers: new Headers({
-                                    "mc.id": "123",
+                                    "mc.id": this.termId,
                                     "mc.args": headerArgs
                                 })
                             })];
@@ -75,21 +76,21 @@ var HostService = /** @class */ (function () {
                                             return;
                                         }
                                         var chunk = new TextDecoder("utf-8").decode(value);
-                                        console.log("Received chunk: " + chunk);
+                                        //console.log("Received chunk: " + chunk);
                                         response += chunk;
                                         var begin = response.indexOf("BEGIN>>", cursor);
                                         var end = response.indexOf("<<END", cursor);
                                         if (begin > -1 && end > -1) {
                                             try {
                                                 var json = response.substring(begin + 7, end);
-                                                console.log("Trying to parse: " + json);
+                                                //console.log("Trying to parse: " + json);
                                                 var item = JSON.parse(json);
                                                 if (item.content !== "")
                                                     print(item.content + "<br/>");
                                                 cursor = end + 1;
                                             }
                                             catch (e) {
-                                                console.log("Error parsing json, waiting for the next chunk");
+                                                //console.log("Error parsing json, waiting for the next chunk")
                                             }
                                         }
                                         push();
@@ -123,10 +124,12 @@ var Parser = /** @class */ (function () {
 }());
 var ViewModel = /** @class */ (function () {
     function ViewModel(input, view) {
+        this.history = [];
+        this.historyCursor = -1;
         this.view = view;
         this.input = input;
         this.parser = new Parser();
-        this.hostService = new HostService();
+        this.hostService = new HostService(Utils.newGuid());
     }
     ViewModel.prototype.init = function () {
         var _this = this;
@@ -138,6 +141,22 @@ var ViewModel = /** @class */ (function () {
                 e.preventDefault();
             }
         });
+        this.input.addEventListener("keyup", function (e) { return _this.onKeyUpDown(e); });
+    };
+    ViewModel.prototype.onKeyUpDown = function (e) {
+        if ((e.code != 'ArrowUp' && e.code != 'ArrowDown') || this.history.length == 0) {
+            return;
+        }
+        ;
+        var isUp = e.code == "ArrowUp";
+        var isDown = !isUp;
+        this.input.value = this.history[this.historyCursor];
+        if (isUp && this.historyCursor > 0) {
+            this.historyCursor -= 1;
+        }
+        else if (isDown && this.historyCursor < this.history.length - 1) {
+            this.historyCursor += 1;
+        }
     };
     ViewModel.prototype.print = function (text) {
         this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";
@@ -156,10 +175,11 @@ var ViewModel = /** @class */ (function () {
                             this.print(Resources.help);
                             return [2 /*return*/];
                         }
-                        // add: cls, history
                         this.print(input);
                         inners = document.getElementsByClassName("inner");
                         last = inners[inners.length - 1];
+                        this.history.push(input);
+                        this.historyCursor = this.history.length - 1;
                         this.input.disabled = true;
                         return [4 /*yield*/, this.hostService.send(command, args, function (txt) { return last.innerHTML += txt.replace(/\r?\n/g, "<br/>"); }, function () {
                                 _this.input.disabled = false;
@@ -181,6 +201,17 @@ var Resources = /** @class */ (function () {
         "<b>list-commands</b> will show a list for discovered commands in your app.<br>\n" +
         "Add <b>--help</b> argument to see description and available parameters. ";
     return Resources;
+}());
+var Utils = /** @class */ (function () {
+    function Utils() {
+    }
+    Utils.newGuid = function () {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    };
+    return Utils;
 }());
 window.onload = function () {
     new ViewModel(document.getElementById("cli-input"), document.getElementById("cli-view"))
