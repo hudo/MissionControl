@@ -177,10 +177,7 @@ class ViewModel {
         this.input.disabled = true;
         await this.hostService.send(command, args,
             resp => {
-                console.log('Alooo:', resp);
-                // add class
                 lastInner.classList.add(resp.type);
-                // add content
                 lastInnerContent.innerHTML += resp.content.replace(/\r?\n/g, "<br/>");
             },
             () => {
@@ -193,7 +190,7 @@ class ViewModel {
 class Resources {
     static readonly help: string = "Some help to get you started:<br>\n" +
         "<b>list-commands</b> will show a list for discovered commands in your app.<br>\n" +
-        "Add <b>--help</b> argument to the command see description and available parameters. ";
+        "Add <b>--help</b> argument to the command to see description and available parameters. ";
 }
 
 class Utils {
