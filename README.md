@@ -13,6 +13,7 @@ Example web site with MC console: https://mc-sample.azurewebsites.net/
 
 Often we want to add some kind of interaction with our application. For example: 
 
+- purge cache
 - check some background tasks
 - state of objects or queues
 - resources consumption
@@ -113,6 +114,7 @@ Available response types:
 - TextResponse
 - ErrorResponse
 - MultipleResponses
+- TableResponse
 
 ### Multiple responses
 
@@ -157,8 +159,7 @@ Response 3 - done.
 Standard commands bundled with MC:
 
 - list-commands: displayes a list of registered commands
-
-TODO: system diagnostics commands
+- server-info: system information
 
 every command can be invoked with **-help** argument. Handler will not be executed, but list of command arguments and its descriptions will be displayed in the console. 
 

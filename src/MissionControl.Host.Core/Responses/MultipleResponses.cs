@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace MissionControl.Host.Core.Responses
 {
+    /// <summary>
+    /// Streams responses back to the client by yielding string content
+    /// </summary>
     public class MultipleResponses : CliResponse // todo: rename
     {
         private readonly Func<AsyncEnumerator<string>.Yield, Task> _responses;
