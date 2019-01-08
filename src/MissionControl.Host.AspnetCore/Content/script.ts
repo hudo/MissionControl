@@ -147,7 +147,7 @@ class ViewModel {
     }
 
     print2(command: string) {
-        this.view.innerHTML += `<div class='row'><div class='inner output'><p class='cmd'>${command}</p>
+        this.view.innerHTML += `<div class='row'><div class='inner output'><p class='cmd'><span class="icon"></span>${command}</p>
         <div class='content'></div></div></div>`;
     }
 

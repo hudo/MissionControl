@@ -164,7 +164,7 @@ var ViewModel = /** @class */ (function () {
         this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";
     };
     ViewModel.prototype.print2 = function (command) {
-        this.view.innerHTML += "<div class='row'><div class='inner output'><p class='cmd'>" + command + "</p>\n        <div class='content'></div></div></div>";
+        this.view.innerHTML += "<div class='row'><div class='inner output'><p class='cmd'><span class=\"icon\"></span>" + command + "</p>\n        <div class='content'></div></div></div>";
     };
     ViewModel.prototype.onExecute = function (e) {
         return __awaiter(this, void 0, void 0, function () {

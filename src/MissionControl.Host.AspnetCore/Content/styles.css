@@ -45,7 +45,6 @@ textarea {
 .cmd, 
 [role=form] { position: relative; }
 
-.cmd:before,
 [role=form]:before {
     position: absolute;
     content: '';
@@ -57,13 +56,51 @@ textarea {
     height: 22px;
 }
 
-.cmd:before { 
-    top: -3px;
-    left: -24px;
-    background-image: url('./arrow-right-gray.svg'); 
+[role=form]:before { background-image: url('./arrow-right.svg'); }
+
+.output .cmd > span {
+    position: absolute;
+    left: -20px;
+    top: 0px;
 }
 
-[role=form]:before { background-image: url('./arrow-right.svg'); }
+.output.text .cmd > span { 
+    top: -3px;
+    width: 22px;
+    height: 22px;
+    background-image: url('./arrow-right-gray.svg'); 
+    background-size: 100%;
+}
+
+.output.error {
+    background-color: #ffe6e6;
+}
+
+.output.error .cmd > span {
+    width: 13px;
+    height: 13px;
+    background-color: red;
+    border-radius: 50%;
+}
+
+.output.error .cmd > span:before,
+.output.error .cmd > span:after {
+    position: absolute;
+    top: 6px;
+    left: 2px;
+    width: 8px;
+    height: 1px;
+    content: "";
+    background-color: white;
+}
+
+.output.error .cmd > span:before {
+    transform: rotate(-45deg);
+}
+
+.output.error .cmd > span:after {
+    transform: rotate(45deg);
+}
 
 textarea {
     padding-left: 1.5rem;
