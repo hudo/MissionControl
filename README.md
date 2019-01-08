@@ -1,8 +1,11 @@
 # MissionControl
 
 [![Nuget Package](https://badgen.net/nuget/v/missioncontrol)](https://www.nuget.org/packages/missioncontrol/)
+[![Build Status](https://dev.azure.com/hhudolet/MissionControl/_apis/build/status/MC%20Sample%20Web%20App%20Pipeline)](https://dev.azure.com/hhudolet/MissionControl/_build/latest?definitionId=2)
 
 CLI as a middleware for your web apps and microservices
+
+Example web site with MC console: https://mc-sample.azurewebsites.net/
 
 **UNDER DEVELOPMENT - alpha version**
 
@@ -68,9 +71,13 @@ public void Configure(IApplicationBuilder app)
 }
 ```
 
+### Basic example
+
 Simple command and handler example: 
 
 ```csharp
+// Gets exposed to CLI as a command:
+// > say-hi -name=Batman -foo=123
 [CliCommand("say-hi", "Say Hi!")]
 public class SayHiCommand : CliCommand
 {
@@ -102,6 +109,49 @@ Computer says hi to Hackerman!
 > _
 ```
 
+Available response types:
+- TextResponse
+- ErrorResponse
+- MultipleResponses
+
+### Multiple responses
+
+For multiple responses we can yield strings:
+```csharp
+[CliCommand("multi-resp", "Multiple responses example")]
+public class MultipleResponsesCommand : CliCommand {  }
+
+public class MultipleResponsesHandler : ICliCommandHandler<MultipleResponsesCommand>
+{
+    public async Task<CliResponse> Handle(MultipleResponsesCommand command)
+    {
+        await service.DoSomething();
+        
+        // here we can "stream" partial responses back to the CLI terminal
+        // use async callback in MultipleResponses constructor:
+        return new MultipleResponses(async yield =>
+        {
+            await yield.ReturnAsync("Response 1");
+            await Task.Delay(2000);
+            await yield.ReturnAsync("Response 2");
+            await Task.Delay(2000);
+            await yield.ReturnAsync("Response 3 - done.");
+        });
+    }
+}
+
+```
+
+CLI output, with 2sec delay between each response line:
+
+```
+> multi-resp
+Response 1
+Response 2
+Response 3 - done.
+> _
+```
+
 ## Included commands
 
 Standard commands bundled with MC:
@@ -121,7 +171,7 @@ Typescript
 
 https://www.nuget.org/packages/MissionControl
 
-[Release Notes](https://github.com/hudo/MissionControl/blob/master/RELEASE-NOTES.md)
+[Release Notes](RELEASE-NOTES.md)
 
 ## Contributors
 
@@ -150,10 +200,14 @@ Thanks [David Guerin](https://github.com/dguerin) for name idea!
 - [ ] JS: get previous command (history)
 - [ ] JS: unit tests
 - [ ] control specific service instance in a cluster (epic)
-- [ ] workflows/sagas/muliple response objects (epic)
+- [x] workflows/sagas/muliple response objects (epic)
 - [ ] Refactor: argument parser (implement tokenizer)
 - [ ] Refactor: better command/handler contracts for easier/streamlined development
 - [x] Included commands: ping, list-commands, command help
-- [ ] DevOps: build, test and deployment pipeline
+- [x] DevOps: build, test and deployment pipeline
 - [ ] DevOps: automatic nuget release
-- [ ] DevOps: sample site deployment pipeline
+- [x] DevOps: sample site deployment pipeline
+
+## Diagrams
+
+[Sequence diagrams](docs/sequence-diagrams.MD), use https://www.websequencediagrams.com/ to render.

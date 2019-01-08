@@ -41,11 +41,12 @@ var Arg = /** @class */ (function () {
     return Arg;
 }());
 var HostService = /** @class */ (function () {
-    function HostService() {
+    function HostService(termId) {
+        this.termId = termId;
     }
-    HostService.prototype.send = function (cmd, args) {
+    HostService.prototype.send = function (cmd, args, print, finish) {
         return __awaiter(this, void 0, void 0, function () {
-            var headerArgs, _i, args_1, item, data, response;
+            var headerArgs, _i, args_1, item, fetchResponse, reader, response, cursor, stream;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -57,16 +58,47 @@ var HostService = /** @class */ (function () {
                         return [4 /*yield*/, fetch("mc/cmd/" + cmd, {
                                 method: "POST",
                                 headers: new Headers({
-                                    "mc.id": "123",
+                                    "mc.id": this.termId,
                                     "mc.args": headerArgs
                                 })
                             })];
                     case 1:
-                        data = _a.sent();
-                        return [4 /*yield*/, data.json()];
-                    case 2:
-                        response = _a.sent();
-                        return [2 /*return*/, response];
+                        fetchResponse = _a.sent();
+                        reader = fetchResponse.body.getReader();
+                        response = "";
+                        cursor = 0;
+                        stream = new ReadableStream({ start: function () {
+                                function push() {
+                                    reader.read().then(function (_a) {
+                                        var done = _a.done, value = _a.value;
+                                        if (done) {
+                                            finish();
+                                            return;
+                                        }
+                                        var chunk = new TextDecoder("utf-8").decode(value);
+                                        //console.log("Received chunk: " + chunk);
+                                        response += chunk;
+                                        var begin = response.indexOf("BEGIN>>", cursor);
+                                        var end = response.indexOf("<<END", cursor);
+                                        if (begin > -1 && end > -1) {
+                                            try {
+                                                var json = response.substring(begin + 7, end);
+                                                //console.log("Trying to parse: " + json);
+                                                var item = JSON.parse(json);
+                                                if (item.content !== "")
+                                                    print(item.content + "<br/>");
+                                                cursor = end + 1;
+                                            }
+                                            catch (e) {
+                                                //console.log("Error parsing json, waiting for the next chunk")
+                                            }
+                                        }
+                                        push();
+                                    });
+                                }
+                                push();
+                            } });
+                        return [2 /*return*/];
                 }
             });
         });
@@ -77,7 +109,7 @@ var Parser = /** @class */ (function () {
     function Parser() {
     }
     Parser.prototype.getArgs = function (text) {
-        var args = new Array();
+        var args = [];
         var parts = text.split(" ");
         parts.forEach(function (part) {
             var arg = part.split("=");
@@ -92,13 +124,16 @@ var Parser = /** @class */ (function () {
 }());
 var ViewModel = /** @class */ (function () {
     function ViewModel(input, view) {
+        this.history = [];
+        this.historyCursor = -1;
         this.view = view;
         this.input = input;
         this.parser = new Parser();
-        this.hostService = new HostService();
+        this.hostService = new HostService(Utils.newGuid());
     }
     ViewModel.prototype.init = function () {
         var _this = this;
+        this.print(Resources.help);
         this.input.addEventListener("keypress", function (e) {
             if (e.which === 13) {
                 _this.onExecute(e);
@@ -106,20 +141,81 @@ var ViewModel = /** @class */ (function () {
                 e.preventDefault();
             }
         });
+        this.input.addEventListener("keyup", function (e) { return _this.onKeyUpDown(e); });
+    };
+    ViewModel.prototype.onKeyUpDown = function (e) {
+        if ((e.code != 'ArrowUp' && e.code != 'ArrowDown') || this.history.length == 0) {
+            return;
+        }
+        ;
+        var isUp = e.code == "ArrowUp";
+        var isDown = !isUp;
+        this.input.value = this.history[this.historyCursor];
+        if (isUp && this.historyCursor > 0) {
+            this.historyCursor -= 1;
+        }
+        else if (isDown && this.historyCursor < this.history.length - 1) {
+            this.historyCursor += 1;
+        }
+    };
+    ViewModel.prototype.print = function (text) {
+        this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";
     };
     ViewModel.prototype.onExecute = function (e) {
-        var _this = this;
-        var input = this.input.value;
-        var command = this.parser.getCommand(input);
-        var args = this.parser.getArgs(input);
-        this.hostService
-            .send(command, args)
-            .then(function (resp) {
-            console.log(resp);
-            _this.view.innerHTML += "<div class='row'><div class='inner output " + resp.type + "'>\n                    <p class='cmd'>" + input + "</p><div class='content'>" + resp.content.replace(/\r?\n/g, '<br/>') + "</div></div>\n                </div>";
+        return __awaiter(this, void 0, void 0, function () {
+            var input, command, args, inners, last;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        input = this.input.value;
+                        command = this.parser.getCommand(input);
+                        args = this.parser.getArgs(input);
+                        this.history.push(input);
+                        this.historyCursor = this.history.length - 1;
+                        if (command === "help") {
+                            this.print(Resources.help);
+                            return [2 /*return*/];
+                        }
+                        if (command === "cls") {
+                            this.view.innerHTML = "";
+                            return [2 /*return*/];
+                        }
+                        this.print(input);
+                        inners = document.getElementsByClassName("inner");
+                        last = inners[inners.length - 1];
+                        this.input.disabled = true;
+                        return [4 /*yield*/, this.hostService.send(command, args, function (txt) { return last.innerHTML += txt.replace(/\r?\n/g, "<br/>"); }, function () {
+                                _this.input.disabled = false;
+                                _this.input.focus();
+                            })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
         });
     };
     return ViewModel;
+}());
+var Resources = /** @class */ (function () {
+    function Resources() {
+    }
+    Resources.help = "Some help to get you started:<br>\n" +
+        "<b>list-commands</b> will show a list for discovered commands in your app.<br>\n" +
+        "Add <b>--help</b> argument to see description and available parameters. ";
+    return Resources;
+}());
+var Utils = /** @class */ (function () {
+    function Utils() {
+    }
+    Utils.newGuid = function () {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    };
+    return Utils;
 }());
 window.onload = function () {
     new ViewModel(document.getElementById("cli-input"), document.getElementById("cli-view"))

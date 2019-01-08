@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Collections.Async;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MissionControl.Host.Core.Contracts;
 using MissionControl.Host.Core.Pipeline;
 using MissionControl.Host.Core.Responses;
+using MissionControl.Host.Core.StandardCommands;
 using MissionControl.Host.Core.Utilities;
 using Newtonsoft.Json;
 
@@ -35,25 +38,26 @@ namespace MissionControl.Host.Core
             _serviceFactory = Guard.NotNull(serviceFactory, nameof(serviceFactory));
             _logger = Guard.NotNull(logger, nameof(logger));
             ClientId = clientId;
-            
-            Task.Run(ProcessInbox);
+
+            var thread = new Thread(ProcessInbox) { IsBackground = true, Name = "Client-" + clientId };
+            thread.Start();
         }
 
         public Task<CliResponse> Execute(CliCommand command)
         { 
             if (_inbox.IsAddingCompleted)
-                throw new ApplicationException("ConHost stopped"); 
-            
-            var completionSource = new TaskCompletionSource<CliResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
-            
-            _inbox.Add((command, completionSource));
-            
+                throw new ApplicationException("ConHost stopped");
+
             _logger.LogDebug($"Command [{command.GetType().Name}] scheduled for processing: {JsonConvert.SerializeObject(command)}");
-            
+
+            var completionSource = new TaskCompletionSource<CliResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            _inbox.Add((command, completionSource));
+
             return completionSource.Task;
         }
 
-        private async Task ProcessInbox()
+        private async void ProcessInbox()
         {
             _logger.LogDebug("Started processing ConHost commands");
             foreach (var request in _inbox.GetConsumingEnumerable())
@@ -71,9 +75,9 @@ namespace MissionControl.Host.Core
                     
                     stopwatch.Stop();
                     _logger.LogInformation($"Command [{cmdName}] executed in {stopwatch.ElapsedMilliseconds}ms");
-                    
+
                     request.completionSource.SetResult(response);
-                    
+
                     Record(request.command);
                 }
                 catch (Exception e)

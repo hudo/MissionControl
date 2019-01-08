@@ -35,7 +35,7 @@ namespace MissionControl.Host.Core
             if (!(Activator.CreateInstance(registration.Value.Type) is CliCommand command))
                 throw new Exception("Command needs to inherit CliCommand");
 
-            command.CorrelationId = request.ClientId;
+            command.ClientId = request.ClientId;
 
             ParseArguments(request, registration.Value.Type, command);
 

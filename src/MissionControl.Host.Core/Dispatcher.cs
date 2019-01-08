@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using MissionControl.Host.Core.Contracts;
 using MissionControl.Host.Core.Responses;
 using MissionControl.Host.Core.Utilities;
 
@@ -67,7 +68,8 @@ namespace MissionControl.Host.Core
                     return new ErrorResponse("Command not found");
                 }
                 
-                return await registration.ConHost.Execute(command.Value);
+                var response = await registration.ConHost.Execute(command.Value);
+                return response;
             }
             catch (Exception e)
             {

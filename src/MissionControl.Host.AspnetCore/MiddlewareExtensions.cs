@@ -25,7 +25,9 @@ namespace MissionControl.Host.AspnetCore
                     : new[] {Assembly.GetCallingAssembly()})
                 .Concat(internalAssembly)
                 .ToArray();
-
+            
+            services.AddSingleton<OutputWriter>(_ => HttpOutputWriter.Write);
+            
             Registry.RegisterServices(services, _assemblies);
         }
         

@@ -24,6 +24,7 @@ namespace MissionControl.Host.AspnetCore
         public MissionControlMiddleware(RequestDelegate next, 
             McOptions options,
             IDispatcher dispatcher, 
+            OutputWriter outputWriter,
             ILogger<MissionControlMiddleware> logger)
         {
             _next = next;
@@ -42,7 +43,7 @@ namespace MissionControl.Host.AspnetCore
             {
                 new StaticContentRoute(assembly),
                 new DefaultIndexRoute(assembly),
-                new CommandsRoute(dispatcher)
+                new CommandsRoute(dispatcher, outputWriter)
             };
         }
 
