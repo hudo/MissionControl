@@ -4,6 +4,14 @@ interface ICliResponse {
     statusCode: number;
 }
 
+interface ITableResponse extends ICliResponse {
+    description: string, 
+    hasHeader: boolean,
+    rows: Array<string[]>,
+    numberColumns: number[],
+    maxNumberOfColumns: number
+}
+
 class Arg {
     key: string;
     val: string;
@@ -19,7 +27,7 @@ class HostService {
         this.termId = termId;
     }
 
-    async send(cmd: string, args: Array<Arg>, print: (x:string) => void, finish: () => void) {    
+    async send(cmd: string, args: Array<Arg>, print: (response:ICliResponse) => void, finish: () => void) {    
         let headerArgs = "";
         for (let item of args) headerArgs += item.key + "=" + item.val + ";";
 
@@ -59,8 +67,8 @@ class HostService {
                             //console.log("Trying to parse: " + json);
                             
                             let item = <ICliResponse>JSON.parse(json);
-                            if (item.content !== "")
-                                print(item.content + "<br/>");
+                            if (item != null)
+                                print(item);
 
                             cursor = end + 1;
                         }
@@ -110,7 +118,7 @@ class ViewModel {
     }
 
     init():void {
-        this.print(Resources.help);
+        this.printText(Resources.help);
         this.input.addEventListener("keypress", (e : KeyboardEvent) => {
             if (e.which === 13) {
                 this.onExecute(e);
@@ -140,8 +148,20 @@ class ViewModel {
         }
     }
     
-    print(text: string) : void {
-        this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";
+    printText(text: string) : void {
+        this.view.innerHTML += "<div class='row'><div class='inner'>" + text.replace(/\r?\n/g, "<br/>") + "<br/></div></div>";
+    }
+
+    printResponse(resp: ICliResponse) : void {
+        if(resp.type === "text") {
+            this.printText(resp.content);
+        }
+        else if (resp.type === "error") {
+            this.printText(resp.content); // todo: format
+        }
+        else if (resp.type === "table") {
+            let tableResp = <ITableResponse>resp;           
+        }
     }
 
     private async onExecute(e: KeyboardEvent) {
@@ -153,7 +173,7 @@ class ViewModel {
         this.historyCursor = this.history.length - 1;
         
         if (command === "help") {
-            this.print(Resources.help);
+            this.printText(Resources.help);
             return;
         }
 
@@ -162,13 +182,13 @@ class ViewModel {
             return;
         }
         
-        this.print(input);
+        this.printText(input);
         let inners = document.getElementsByClassName("inner");
         let last = inners[inners.length - 1];
         
         this.input.disabled = true;
         await this.hostService.send(command, args,  
-            txt => last.innerHTML += txt.replace(/\r?\n/g, "<br/>"),
+            resp =>  this.printResponse(resp), //last.innerHTML += txt.replace(/\r?\n/g, "<br/>"),
             () => {
                 this.input.disabled = false;
                 this.input.focus();    

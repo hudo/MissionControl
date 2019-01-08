@@ -85,8 +85,8 @@ var HostService = /** @class */ (function () {
                                                 var json = response.substring(begin + 7, end);
                                                 //console.log("Trying to parse: " + json);
                                                 var item = JSON.parse(json);
-                                                if (item.content !== "")
-                                                    print(item.content + "<br/>");
+                                                if (item != null)
+                                                    print(item);
                                                 cursor = end + 1;
                                             }
                                             catch (e) {
@@ -133,7 +133,7 @@ var ViewModel = /** @class */ (function () {
     }
     ViewModel.prototype.init = function () {
         var _this = this;
-        this.print(Resources.help);
+        this.printText(Resources.help);
         this.input.addEventListener("keypress", function (e) {
             if (e.which === 13) {
                 _this.onExecute(e);
@@ -158,8 +158,19 @@ var ViewModel = /** @class */ (function () {
             this.historyCursor += 1;
         }
     };
-    ViewModel.prototype.print = function (text) {
-        this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";
+    ViewModel.prototype.printText = function (text) {
+        this.view.innerHTML += "<div class='row'><div class='inner'>" + text.replace(/\r?\n/g, "<br/>") + "<br/></div></div>";
+    };
+    ViewModel.prototype.printResponse = function (resp) {
+        if (resp.type === "text") {
+            this.printText(resp.content);
+        }
+        else if (resp.type === "error") {
+            this.printText(resp.content); // todo: format
+        }
+        else if (resp.type === "table") {
+            var tableResp = resp;
+        }
     };
     ViewModel.prototype.onExecute = function (e) {
         return __awaiter(this, void 0, void 0, function () {
@@ -174,18 +185,19 @@ var ViewModel = /** @class */ (function () {
                         this.history.push(input);
                         this.historyCursor = this.history.length - 1;
                         if (command === "help") {
-                            this.print(Resources.help);
+                            this.printText(Resources.help);
                             return [2 /*return*/];
                         }
                         if (command === "cls") {
                             this.view.innerHTML = "";
                             return [2 /*return*/];
                         }
-                        this.print(input);
+                        this.printText(input);
                         inners = document.getElementsByClassName("inner");
                         last = inners[inners.length - 1];
                         this.input.disabled = true;
-                        return [4 /*yield*/, this.hostService.send(command, args, function (txt) { return last.innerHTML += txt.replace(/\r?\n/g, "<br/>"); }, function () {
+                        return [4 /*yield*/, this.hostService.send(command, args, function (resp) { return _this.printResponse(resp); }, //last.innerHTML += txt.replace(/\r?\n/g, "<br/>"),
+                            function () {
                                 _this.input.disabled = false;
                                 _this.input.focus();
                             })];
