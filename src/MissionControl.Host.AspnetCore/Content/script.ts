@@ -19,7 +19,7 @@ class HostService {
         this.termId = termId;
     }
 
-    async send(cmd: string, args: Array<Arg>, print: (x:string) => void, finish: () => void) {    
+    async send(cmd: string, args: Array<Arg>, print: (x:ICliResponse) => void, finish: () => void) {    
         let headerArgs = "";
         for (let item of args) headerArgs += item.key + "=" + item.val + ";";
 
@@ -60,7 +60,7 @@ class HostService {
                             
                             let item = <ICliResponse>JSON.parse(json);
                             if (item.content !== "")
-                                print(item.content + "<br/>");
+                                print(item);
 
                             cursor = end + 1;
                         }
@@ -168,7 +168,7 @@ class ViewModel {
         
         this.input.disabled = true;
         await this.hostService.send(command, args,  
-            txt => last.innerHTML += txt.replace(/\r?\n/g, "<br/>"),
+            txt => last.innerHTML += txt.content.replace(/\r?\n/g, "<br/>"),
             () => {
                 this.input.disabled = false;
                 this.input.focus();    
