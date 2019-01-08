@@ -146,7 +146,7 @@ class ViewModel {
         this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";
     }
 
-    print2(command: string) {
+    printOutput(command: string) {
         this.view.innerHTML += `<div class='row'><div class='inner output'><p class='cmd'><span class="icon"></span>${command}</p>
         <div class='content'></div></div></div>`;
     }
@@ -169,7 +169,7 @@ class ViewModel {
             return;
         }
 
-        this.print2(input);
+        this.printOutput(input);
         let inners = document.getElementsByClassName("inner");
         let lastInner = inners[inners.length - 1];
         let lastInnerContent = lastInner.querySelector(".content");
