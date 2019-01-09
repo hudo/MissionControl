@@ -11,6 +11,8 @@
     <EmbeddedResource Include="Content\script.js" />
     <EmbeddedResource Include="Content\styles.css" />
     <EmbeddedResource Include="Content\fetch.js" />
+    <EmbeddedResource Include="Content\arrow-right.svg" />
+    <EmbeddedResource Include="Content\arrow-right-gray.svg" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Content\script.ts" />
