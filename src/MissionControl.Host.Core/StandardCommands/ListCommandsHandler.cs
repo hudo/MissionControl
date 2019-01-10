@@ -5,7 +5,7 @@ using MissionControl.Host.Core.Responses;
 
 namespace MissionControl.Host.Core.StandardCommands
 {
-    [CliCommand("list-command", help: "List of registered commands")]
+    [CliCommand("list-commands", help: "List of registered commands")]
     internal class ListCommandsCommand : CliCommand
     {
 
