@@ -194,6 +194,7 @@ Thanks [David Guerin](https://github.com/dguerin) for name idea!
 - [x] Args: help (done), skip (done), required (done)
 - [ ] Authentication (username/pass, JWT bearer)
 - [ ] UI CSS standards
+- [ ] proper WebPack + watch front-end dev configuration 
 - [ ] JS: UI layout and structure
 - [x] JS: input parsing
 - [ ] JS: ajax proxy
