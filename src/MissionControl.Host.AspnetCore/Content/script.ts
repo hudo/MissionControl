@@ -109,6 +109,7 @@ class ViewModel {
     history: Array<string> = [];
     historyCursor: number = -1;
 
+    renderer: ViewRenderer;
     parser: Parser;
     hostService: HostService;
 
@@ -117,10 +118,11 @@ class ViewModel {
         this.input = input;
         this.parser = new Parser();
         this.hostService = new HostService(Utils.newGuid());
+        this.renderer = new ViewRenderer(view);
     }
 
     init(): void {
-        this.print(Resources.help);
+        this.printPlain(Resources.help);
         this.input.addEventListener("keypress", (e: KeyboardEvent) => {
             if (e.which === 13) {
                 this.onExecute(e);
@@ -150,11 +152,11 @@ class ViewModel {
         }
     }
 
-    print(text: string): void {
+    printPlain(text: string): void {
         this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";
     }
 
-    printOutput(command: string) {
+    printRow(command: string)  {
         this.view.innerHTML += `<div class='row'><div class='inner output'><p class='cmd'><span class="icon"></span>${command}</p>
         <div class='content'></div></div></div>`;
     }
@@ -168,16 +170,15 @@ class ViewModel {
         this.historyCursor = this.history.length - 1;
 
         if (command === "help") {
-            this.printOutput(Resources.help);
+            this.printRow(Resources.help);
             return;
         }
 
         if (command === "cls") {
-            this.view.innerHTML = "";
+            this.renderer.clear();
             return;
         }
-
-        this.printOutput(input);
+    
         let inners = document.getElementsByClassName("inner");
         let lastInner = inners[inners.length - 1];
         let lastInnerContent = lastInner.querySelector(".content");
@@ -192,6 +193,17 @@ class ViewModel {
                 this.input.disabled = false;
                 this.input.focus();
             });
+    }
+}
+
+class ViewRenderer {
+    view:HTMLDivElement;
+    constructor(view:HTMLDivElement){
+        this.view = view;
+    }
+
+    clear() {
+        this.view.innerHTML = "";
     }
 }
 

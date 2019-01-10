@@ -132,10 +132,11 @@ var ViewModel = /** @class */ (function () {
         this.input = input;
         this.parser = new Parser();
         this.hostService = new HostService(Utils.newGuid());
+        this.renderer = new ViewRenderer(view);
     }
     ViewModel.prototype.init = function () {
         var _this = this;
-        this.print(Resources.help);
+        this.printPlain(Resources.help);
         this.input.addEventListener("keypress", function (e) {
             if (e.which === 13) {
                 _this.onExecute(e);
@@ -160,10 +161,10 @@ var ViewModel = /** @class */ (function () {
             this.historyCursor += 1;
         }
     };
-    ViewModel.prototype.print = function (text) {
+    ViewModel.prototype.printPlain = function (text) {
         this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";
     };
-    ViewModel.prototype.printOutput = function (command) {
+    ViewModel.prototype.printRow = function (command) {
         this.view.innerHTML += "<div class='row'><div class='inner output'><p class='cmd'><span class=\"icon\"></span>" + command + "</p>\n        <div class='content'></div></div></div>";
     };
     ViewModel.prototype.onExecute = function (e) {
@@ -179,14 +180,13 @@ var ViewModel = /** @class */ (function () {
                         this.history.push(input);
                         this.historyCursor = this.history.length - 1;
                         if (command === "help") {
-                            this.printOutput(Resources.help);
+                            this.printRow(Resources.help);
                             return [2 /*return*/];
                         }
                         if (command === "cls") {
-                            this.view.innerHTML = "";
+                            this.renderer.clear();
                             return [2 /*return*/];
                         }
-                        this.printOutput(input);
                         inners = document.getElementsByClassName("inner");
                         lastInner = inners[inners.length - 1];
                         lastInnerContent = lastInner.querySelector(".content");
@@ -206,6 +206,15 @@ var ViewModel = /** @class */ (function () {
         });
     };
     return ViewModel;
+}());
+var ViewRenderer = /** @class */ (function () {
+    function ViewRenderer(view) {
+        this.view = view;
+    }
+    ViewRenderer.prototype.clear = function () {
+        this.view.innerHTML = "";
+    };
+    return ViewRenderer;
 }());
 var Resources = /** @class */ (function () {
     function Resources() {
