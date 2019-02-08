@@ -65,11 +65,9 @@ class HostService {
 
                                 let json = response.substring(begin + 7, end);
 
-                                //console.log("Trying to parse: " + json);
-
                                 let item = <ICliResponse>JSON.parse(json);
-                                if (item.content !== "")
-                                    print(item);
+
+                                if (item) print(item);
 
                                 cursor = end + 1;
                             }
@@ -87,6 +85,7 @@ class HostService {
     }
 }
 
+
 class Parser {
     getArgs(text: string): Array<Arg> {
         const args = [];
@@ -103,34 +102,32 @@ class Parser {
 }
 
 class ViewModel {
-    input: HTMLTextAreaElement;
-    view: HTMLDivElement;
+    inputEl: HTMLTextAreaElement;
 
     history: Array<string> = [];
     historyCursor: number = -1;
 
-    renderer: ViewRenderer;
+    view: ViewRenderer;
     parser: Parser;
     hostService: HostService;
 
-    constructor(input: HTMLTextAreaElement, view: HTMLDivElement) {
-        this.view = view;
-        this.input = input;
+    constructor(inputEl: HTMLTextAreaElement, viewEl: HTMLDivElement) {
+        this.inputEl = inputEl;
         this.parser = new Parser();
         this.hostService = new HostService(Utils.newGuid());
-        this.renderer = new ViewRenderer(view);
+        this.view = new ViewRenderer(viewEl);
     }
 
     init(): void {
-        this.printPlain(Resources.help);
-        this.input.addEventListener("keypress", (e: KeyboardEvent) => {
+        this.view.printPlain(Resources.help);
+        this.inputEl.addEventListener("keypress", (e: KeyboardEvent) => {
             if (e.which === 13) {
                 this.onExecute(e);
-                this.input.value = "";
+                this.inputEl.value = "";
                 e.preventDefault();
             }
         });
-        this.input.addEventListener("keyup", (e: KeyboardEvent) => this.onKeyUpDown(e));
+        this.inputEl.addEventListener("keyup", (e: KeyboardEvent) => this.onKeyUpDown(e));
 
     }
 
@@ -142,7 +139,7 @@ class ViewModel {
         let isUp = e.code == "ArrowUp";
         let isDown = !isUp;
 
-        this.input.value = this.history[this.historyCursor];
+        this.inputEl.value = this.history[this.historyCursor];
 
         if (isUp && this.historyCursor > 0) {
             this.historyCursor -= 1;
@@ -150,6 +147,53 @@ class ViewModel {
         else if (isDown && this.historyCursor < this.history.length - 1) {
             this.historyCursor += 1;
         }
+    }
+
+   
+    private async onExecute(e: KeyboardEvent) {
+        const input = this.inputEl.value;
+        const command = this.parser.getCommand(input);
+        const args = this.parser.getArgs(input);
+
+        this.history.push(input);
+        this.historyCursor = this.history.length - 1;
+
+        if (command === "help") {
+            this.view.printRow(Resources.help);
+            return;
+        }
+
+        if (command === "cls") {
+            this.view.clear();
+            return;
+        }
+    
+        this.inputEl.disabled = true;
+        await this.hostService.send(command, args,
+            resp => {
+                this.view.getLastRow().classList.add(resp.type);
+                this.view.getLastRowContent().innerHTML += resp.content.replace(/\r?\n/g, "<br/>");
+            },
+            () => {
+                this.inputEl.disabled = false;
+                this.inputEl.focus();
+            });
+    }
+}
+
+class ViewRenderer {
+    view:HTMLDivElement;
+    constructor(view:HTMLDivElement){
+        this.view = view;
+    }
+
+    getLastRow() : Element {
+        let inners = document.getElementsByClassName("inner");
+        return inners[inners.length - 1];
+    }
+
+    getLastRowContent() : Element {
+        return this.getLastRow().querySelector(".content");
     }
 
     printPlain(text: string): void {
@@ -161,50 +205,22 @@ class ViewModel {
         <div class='content'></div></div></div>`;
     }
 
-    private async onExecute(e: KeyboardEvent) {
-        const input = this.input.value;
-        const command = this.parser.getCommand(input);
-        const args = this.parser.getArgs(input);
-
-        this.history.push(input);
-        this.historyCursor = this.history.length - 1;
-
-        if (command === "help") {
-            this.printRow(Resources.help);
-            return;
-        }
-
-        if (command === "cls") {
-            this.renderer.clear();
-            return;
-        }
-    
-        let inners = document.getElementsByClassName("inner");
-        let lastInner = inners[inners.length - 1];
-        let lastInnerContent = lastInner.querySelector(".content");
-
-        this.input.disabled = true;
-        await this.hostService.send(command, args,
-            resp => {
-                lastInner.classList.add(resp.type);
-                lastInnerContent.innerHTML += resp.content.replace(/\r?\n/g, "<br/>");
-            },
-            () => {
-                this.input.disabled = false;
-                this.input.focus();
-            });
-    }
-}
-
-class ViewRenderer {
-    view:HTMLDivElement;
-    constructor(view:HTMLDivElement){
-        this.view = view;
-    }
-
     clear() {
         this.view.innerHTML = "";
     }
+}
+
+
+class ResponseRenderer {
+    item : ICliResponse;
+    constructor(item : ICliResponse) {
+        this.item = item;
+    }
+
+    Print() : string {
+        return  "";
+    }
+
 }
 
 class Resources {
