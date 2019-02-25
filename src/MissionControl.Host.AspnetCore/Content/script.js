@@ -179,6 +179,7 @@ var ViewModel = /** @class */ (function () {
                             this.view.clear();
                             return [2 /*return*/];
                         }
+                        this.view.printRow(input);
                         this.inputEl.disabled = true;
                         return [4 /*yield*/, this.hostService.send(command, args, function (resp) {
                                 _this.view.getLastRow().classList.add(resp.type);

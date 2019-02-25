@@ -159,7 +159,7 @@ class ViewModel {
         this.historyCursor = this.history.length - 1;
 
         if (command === "help") {
-            this.view.printRow(Resources.help);
+            this.view.printCommand(Resources.help);
             return;
         }
 
@@ -167,10 +167,12 @@ class ViewModel {
             this.view.clear();
             return;
         }
-    
+        
+        this.view.printCommand(input);
         this.inputEl.disabled = true;
         await this.hostService.send(command, args,
             resp => {
+                this.view.printResponse(resp);
                 this.view.getLastRow().classList.add(resp.type);
                 this.view.getLastRowContent().innerHTML += resp.content.replace(/\r?\n/g, "<br/>");
             },
@@ -196,11 +198,15 @@ class ViewRenderer {
         return this.getLastRow().querySelector(".content");
     }
 
+    printResponse(response:ICliResponse) : void {
+
+    }
+
     printPlain(text: string): void {
         this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";
     }
 
-    printRow(command: string)  {
+    printCommand(command: string)  {
         this.view.innerHTML += `<div class='row'><div class='inner output'><p class='cmd'><span class="icon"></span>${command}</p>
         <div class='content'></div></div></div>`;
     }
