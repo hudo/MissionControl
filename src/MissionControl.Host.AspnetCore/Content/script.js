@@ -106,6 +106,7 @@ var HostService = /** @class */ (function () {
     };
     return HostService;
 }());
+// very simple parser that expects input command format like: "some-command -arg1=a -arg2=b"
 var Parser = /** @class */ (function () {
     function Parser() {
     }
@@ -136,7 +137,7 @@ var ViewModel = /** @class */ (function () {
         var _this = this;
         this.view.printPlain(Resources.help);
         this.inputEl.addEventListener("keypress", function (e) {
-            if (e.which === 13) {
+            if (e.which === 13) { // handle key enter
                 _this.onExecute(e);
                 _this.inputEl.value = "";
                 e.preventDefault();
@@ -144,6 +145,7 @@ var ViewModel = /** @class */ (function () {
         });
         this.inputEl.addEventListener("keyup", function (e) { return _this.onKeyUpDown(e); });
     };
+    // scrolls through command history when user presses keys up or down
     ViewModel.prototype.onKeyUpDown = function (e) {
         if ((e.code != 'ArrowUp' && e.code != 'ArrowDown') || this.history.length == 0) {
             return;
@@ -172,19 +174,22 @@ var ViewModel = /** @class */ (function () {
                         this.history.push(input);
                         this.historyCursor = this.history.length - 1;
                         if (command === "help") {
-                            this.view.printRow(Resources.help);
+                            this.view.printCommand(Resources.help);
                             return [2 /*return*/];
                         }
                         if (command === "cls") {
                             this.view.clear();
                             return [2 /*return*/];
                         }
-                        this.view.printRow(input);
+                        // print actual command. Creates new response "block" where response content is injected
+                        this.view.printCommand(input);
+                        // we will not allow multiple commands while one is still executing
                         this.inputEl.disabled = true;
                         return [4 /*yield*/, this.hostService.send(command, args, function (resp) {
-                                _this.view.getLastRow().classList.add(resp.type);
-                                _this.view.getLastRowContent().innerHTML += resp.content.replace(/\r?\n/g, "<br/>");
+                                // on chunk received
+                                _this.view.printResponse(resp);
                             }, function () {
+                                // on receiving finished, re-enable input box
                                 _this.inputEl.disabled = false;
                                 _this.inputEl.focus();
                             })];
@@ -197,6 +202,7 @@ var ViewModel = /** @class */ (function () {
     };
     return ViewModel;
 }());
+// this nasty thing needs to be refactored
 var ViewRenderer = /** @class */ (function () {
     function ViewRenderer(view) {
         this.view = view;
@@ -208,10 +214,41 @@ var ViewRenderer = /** @class */ (function () {
     ViewRenderer.prototype.getLastRowContent = function () {
         return this.getLastRow().querySelector(".content");
     };
+    ViewRenderer.prototype.printResponse = function (response) {
+        this.getLastRow().classList.add(response.type);
+        // refactor to strategy
+        if (response.type == "table") {
+            this.renderTable(response);
+        }
+        else {
+            this.getLastRowContent().innerHTML += response.content.replace(/\r?\n/g, "<br/>");
+        }
+    };
+    ViewRenderer.prototype.renderTable = function (resp) {
+        // move to separate function, maybe also refactor
+        var html = "<table>";
+        for (var i = 0; i < resp.rows.length; i++) {
+            var row = resp.rows[i];
+            html += "<tr>";
+            if (i == 0) {
+                html += "<tr>";
+                for (var cell in row) {
+                    html += "<td>" + cell + "</td>";
+                }
+                html += "</tr>";
+            }
+            for (var cell in row) {
+                html += "<td>" + row[cell] + "</td>";
+            }
+            html += "</td>";
+        }
+        html += "</html>";
+        this.getLastRowContent().innerHTML += html;
+    };
     ViewRenderer.prototype.printPlain = function (text) {
         this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";
     };
-    ViewRenderer.prototype.printRow = function (command) {
+    ViewRenderer.prototype.printCommand = function (command) {
         this.view.innerHTML += "<div class='row'><div class='inner output'><p class='cmd'><span class=\"icon\"></span>" + command + "</p>\n        <div class='content'></div></div></div>";
     };
     ViewRenderer.prototype.clear = function () {
@@ -219,6 +256,7 @@ var ViewRenderer = /** @class */ (function () {
     };
     return ViewRenderer;
 }());
+// WIP, each response type should have its own renderer. Should be func and not a class maybe?
 var ResponseRenderer = /** @class */ (function () {
     function ResponseRenderer(item) {
         this.item = item;
