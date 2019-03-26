@@ -110,14 +110,16 @@ Computer says hi to Hackerman!
 > _
 ```
 
-Available response types:
-- TextResponse
-- ErrorResponse
-- MultipleResponses
-- TableResponse
+### Available response types
+
+- TextResponse: simple text message
+- ErrorResponse: text message with error UI
+- MultipleResponses: async (chunked) responses
+- TableResponse: collection of objects rendered as a table
 
 ### Multiple responses
 
+Sometimes you want to "stream" responses back to the client while executing some long-running task on the server.  
 For multiple responses we can yield strings:
 ```csharp
 [CliCommand("multi-resp", "Multiple responses example")]
@@ -198,8 +200,8 @@ Thanks [David Guerin](https://github.com/dguerin) for name idea!
 - [ ] JS: UI layout and structure
 - [x] JS: input parsing
 - [ ] JS: ajax proxy
-- [ ] JS: response rendering (text, warnings, errors)
-- [ ] JS: get previous command (history)
+- [x] JS: response rendering (text, warnings, errors)
+- [x] JS: get previous command (history)
 - [ ] JS: unit tests
 - [ ] control specific service instance in a cluster (epic)
 - [x] workflows/sagas/muliple response objects (epic)
