@@ -13,6 +13,7 @@ Example web site with MC console: https://mc-sample.azurewebsites.net/
 
 Often we want to add some kind of interaction with our application. For example: 
 
+- purge cache
 - check some background tasks
 - state of objects or queues
 - resources consumption
@@ -109,13 +110,16 @@ Computer says hi to Hackerman!
 > _
 ```
 
-Available response types:
-- TextResponse
-- ErrorResponse
-- MultipleResponses
+### Available response types
+
+- TextResponse: simple text message
+- ErrorResponse: text message with error UI
+- MultipleResponses: async (chunked) responses
+- TableResponse: collection of objects rendered as a table
 
 ### Multiple responses
 
+Sometimes you want to "stream" responses back to the client while executing some long-running task on the server.  
 For multiple responses we can yield strings:
 ```csharp
 [CliCommand("multi-resp", "Multiple responses example")]
@@ -157,8 +161,7 @@ Response 3 - done.
 Standard commands bundled with MC:
 
 - list-commands: displayes a list of registered commands
-
-TODO: system diagnostics commands
+- server-info: system information
 
 every command can be invoked with **-help** argument. Handler will not be executed, but list of command arguments and its descriptions will be displayed in the console. 
 
@@ -193,11 +196,12 @@ Thanks [David Guerin](https://github.com/dguerin) for name idea!
 - [x] Args: help (done), skip (done), required (done)
 - [ ] Authentication (username/pass, JWT bearer)
 - [ ] UI CSS standards
+- [ ] proper WebPack + watch front-end dev configuration 
 - [ ] JS: UI layout and structure
 - [x] JS: input parsing
 - [ ] JS: ajax proxy
-- [ ] JS: response rendering (text, warnings, errors)
-- [ ] JS: get previous command (history)
+- [x] JS: response rendering (text, warnings, errors)
+- [x] JS: get previous command (history)
 - [ ] JS: unit tests
 - [ ] control specific service instance in a cluster (epic)
 - [x] workflows/sagas/muliple response objects (epic)

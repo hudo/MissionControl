@@ -21,17 +21,6 @@
                 "kind": "build",
                 "isDefault": true
             }
-        },
-        {
-            "type": "typescript",
-            "tsconfig": "src/MissionControl.Host.AspnetCore/Content/tsconfig.json",
-            "problemMatcher": [
-                "$tsc"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
         }
     ]
 }

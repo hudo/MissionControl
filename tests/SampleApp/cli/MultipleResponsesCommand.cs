@@ -16,9 +16,9 @@ namespace SampleApp.cli
             
             return new MultipleResponses(async yield =>
             {
-                await yield.ReturnAsync("Response 1");
+                await yield.ReturnAsync("Response 1\n");
                 await Task.Delay(2000);
-                await yield.ReturnAsync("Response 2");
+                await yield.ReturnAsync("Response 2\n");
                 await Task.Delay(2000);
                 await yield.ReturnAsync("Response 3 - done.");
             });

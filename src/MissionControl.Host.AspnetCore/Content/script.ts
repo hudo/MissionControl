@@ -4,6 +4,11 @@ interface ICliResponse {
     statusCode: number;
 }
 
+interface ITableResponse extends ICliResponse {
+    description: string; 
+    rows: Array<object>
+}
+
 class Arg {
     key: string;
     val: string;
@@ -35,6 +40,10 @@ class HostService {
         let response = "";
         let cursor = 0;
 
+        // when receiving multi-part responses (chunks), each part will have BEGIN>> and <<END
+        // and will contain full JSON inside. So this function is reading chunk by chunk, and trying
+        // to find that begin and end, and print whatever is received inide:
+
         // @ts-ignore
         const stream = new ReadableStream({
             start() {
@@ -57,11 +66,9 @@ class HostService {
 
                                 let json = response.substring(begin + 7, end);
 
-                                //console.log("Trying to parse: " + json);
-
                                 let item = <ICliResponse>JSON.parse(json);
-                                if (item.content !== "")
-                                    print(item);
+
+                                if (item) print(item);
 
                                 cursor = end + 1;
                             }
@@ -79,6 +86,7 @@ class HostService {
     }
 }
 
+// very simple parser that expects input command format like: "some-command -arg1=a -arg2=b"
 class Parser {
     getArgs(text: string): Array<Arg> {
         const args = [];
@@ -95,35 +103,36 @@ class Parser {
 }
 
 class ViewModel {
-    input: HTMLTextAreaElement;
-    view: HTMLDivElement;
+    inputEl: HTMLTextAreaElement;
 
     history: Array<string> = [];
     historyCursor: number = -1;
 
+    view: ViewRenderer;
     parser: Parser;
     hostService: HostService;
 
-    constructor(input: HTMLTextAreaElement, view: HTMLDivElement) {
-        this.view = view;
-        this.input = input;
+    constructor(inputEl: HTMLTextAreaElement, viewEl: HTMLDivElement) {
+        this.inputEl = inputEl;
         this.parser = new Parser();
         this.hostService = new HostService(Utils.newGuid());
+        this.view = new ViewRenderer(viewEl);
     }
 
     init(): void {
-        this.print(Resources.help);
-        this.input.addEventListener("keypress", (e: KeyboardEvent) => {
-            if (e.which === 13) {
+        this.view.printPlain(Resources.help);
+        this.inputEl.addEventListener("keypress", (e: KeyboardEvent) => {
+            if (e.which === 13) { // handle key enter
                 this.onExecute(e);
-                this.input.value = "";
+                this.inputEl.value = "";
                 e.preventDefault();
             }
         });
-        this.input.addEventListener("keyup", (e: KeyboardEvent) => this.onKeyUpDown(e));
+        this.inputEl.addEventListener("keyup", (e: KeyboardEvent) => this.onKeyUpDown(e));
 
     }
 
+    // scrolls through command history when user presses keys up or down
     private onKeyUpDown(e: KeyboardEvent) {
         if ((e.code != 'ArrowUp' && e.code != 'ArrowDown') || this.history.length == 0) {
             return
@@ -132,7 +141,7 @@ class ViewModel {
         let isUp = e.code == "ArrowUp";
         let isDown = !isUp;
 
-        this.input.value = this.history[this.historyCursor];
+        this.inputEl.value = this.history[this.historyCursor];
 
         if (isUp && this.historyCursor > 0) {
             this.historyCursor -= 1;
@@ -142,17 +151,9 @@ class ViewModel {
         }
     }
 
-    print(text: string): void {
-        this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";
-    }
-
-    printOutput(command: string) {
-        this.view.innerHTML += `<div class='row'><div class='inner output'><p class='cmd'><span class="icon"></span>${command}</p>
-        <div class='content'></div></div></div>`;
-    }
-
+   
     private async onExecute(e: KeyboardEvent) {
-        const input = this.input.value;
+        const input = this.inputEl.value;
         const command = this.parser.getCommand(input);
         const args = this.parser.getArgs(input);
 
@@ -160,31 +161,112 @@ class ViewModel {
         this.historyCursor = this.history.length - 1;
 
         if (command === "help") {
-            this.print(Resources.help);
+            this.view.printCommand(Resources.help);
             return;
         }
 
         if (command === "cls") {
-            this.view.innerHTML = "";
+            this.view.clear();
             return;
         }
+        
+        // print actual command. Creates new response "block" where response content is injected
+        this.view.printCommand(input);
 
-        this.printOutput(input);
-        let inners = document.getElementsByClassName("inner");
-        let lastInner = inners[inners.length - 1];
-        let lastInnerContent = lastInner.querySelector(".content");
-
-        this.input.disabled = true;
+        // we will not allow multiple commands while one is still executing
+        this.inputEl.disabled = true;
         await this.hostService.send(command, args,
             resp => {
-                lastInner.classList.add(resp.type);
-                lastInnerContent.innerHTML += resp.content.replace(/\r?\n/g, "<br/>");
+                // on chunk received
+                this.view.printResponse(resp);
             },
             () => {
-                this.input.disabled = false;
-                this.input.focus();
+                // on receiving finished, re-enable input box
+                this.inputEl.disabled = false;
+                this.inputEl.focus();
             });
     }
+}
+
+// this nasty thing needs to be refactored
+class ViewRenderer {
+    view:HTMLDivElement; 
+    constructor(view:HTMLDivElement){
+        this.view = view;
+    }
+
+    getLastRow() : Element {
+        let inners = document.getElementsByClassName("inner");
+        return inners[inners.length - 1];
+    }
+
+    getLastRowContent() : Element { 
+        return this.getLastRow().querySelector(".content");
+    }
+
+    printResponse(response:ICliResponse) : void {
+        this.getLastRow().classList.add(response.type);
+
+        // refactor to strategy
+        if (response.type == "table") {
+            this.renderTable(<ITableResponse>response);
+        }
+        else {
+            this.getLastRowContent().innerHTML +=  response.content.replace(/\r?\n/g, "<br/>");
+        }
+    }
+
+    renderTable(resp : ITableResponse) {
+        // move to separate function, maybe also refactor
+        let html = "<table>"; 
+        for (var i = 0; i < resp.rows.length; i++) {
+            const row = resp.rows[i];
+            html += "<tr>";
+
+            if (i == 0) {
+                html += "<tr>";
+                for (var cell in row) {
+                    html += "<td>" + cell + "</td>";
+                }    
+                html += "</tr>";
+            }
+
+            for (var cell in row) {
+                html += "<td>" + row[cell] + "</td>";
+            }
+            
+            html += "</td>";
+        }
+        html += "</html>";
+
+        this.getLastRowContent().innerHTML += html;
+    }
+
+    printPlain(text: string): void {
+        this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";
+    }
+
+    printCommand(command: string)  {
+        this.view.innerHTML += `<div class='row'><div class='inner output'><p class='cmd'><span class="icon"></span>${command}</p>
+        <div class='content'></div></div></div>`;
+    }
+
+    clear() {
+        this.view.innerHTML = "";
+    }
+}
+
+// WIP, each response type should have its own renderer. Should be func and not a class maybe?
+class ResponseRenderer {
+    item : ICliResponse;
+    constructor(item : ICliResponse) {
+        this.item = item;
+    }
+
+    Print() : string {
+        return  "";
+    }
+
 }
 
 class Resources {
