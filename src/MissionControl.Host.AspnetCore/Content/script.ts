@@ -226,7 +226,8 @@ class ViewRenderer {
             if (i == 0) {
                 html += "<tr>";
                 for (var cell in row) {
-                    html += "<td>" + cell + "</td>";
+                    let value = cell.charAt(0).toUpperCase() + cell.slice(1);
+                    html += "<td>" + value + "</td>";
                 }    
                 html += "</tr>";
             }

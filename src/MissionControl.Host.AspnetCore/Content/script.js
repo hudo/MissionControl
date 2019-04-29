@@ -233,7 +233,8 @@ var ViewRenderer = /** @class */ (function () {
             if (i == 0) {
                 html += "<tr>";
                 for (var cell in row) {
-                    html += "<td>" + cell + "</td>";
+                    var value = cell.charAt(0).toUpperCase() + cell.slice(1);
+                    html += "<td>" + value + "</td>";
                 }
                 html += "</tr>";
             }
