@@ -226,25 +226,34 @@ var ViewRenderer = /** @class */ (function () {
     };
     ViewRenderer.prototype.renderTable = function (resp) {
         // move to separate function, maybe also refactor
+        var headers = this.setHeaders(resp.rows);
         var html = "<table>";
+        html += "<thead><tr>";
+        headers.forEach(function (header) {
+            html += "<td>" + header + "</td>";
+        });
+        html += "</tr></thead>";
         for (var i = 0; i < resp.rows.length; i++) {
             var row = resp.rows[i];
-            html += "<tr>";
-            if (i == 0) {
-                html += "<tr>";
-                for (var cell in row) {
-                    var value = cell.charAt(0).toUpperCase() + cell.slice(1);
-                    html += "<td>" + value + "</td>";
-                }
-                html += "</tr>";
-            }
             for (var cell in row) {
                 html += "<td>" + row[cell] + "</td>";
             }
-            html += "</td>";
+            html += "</tr>";
         }
-        html += "</html>";
+        html += "</table>";
         this.getLastRowContent().innerHTML += html;
+    };
+    ViewRenderer.prototype.setHeaders = function (rows) {
+        var headers = [];
+        rows.forEach(function (row, idx) {
+            if (idx === 0) {
+                for (var cell in row) {
+                    var value = cell.charAt(0).toUpperCase() + cell.slice(1);
+                    headers.push(value);
+                }
+            }
+        });
+        return headers;
     };
     ViewRenderer.prototype.printPlain = function (text) {
         this.view.innerHTML += "<div class='row'><div class='inner'>" + text + "<br/></div></div>";

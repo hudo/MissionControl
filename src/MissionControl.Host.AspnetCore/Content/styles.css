@@ -30,6 +30,20 @@ textarea {
     font: 1rem monospace;
 }
 
+table {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 300px;
+    border: 1px solid lightgray;
+    border-collapse: collapse;
+}
+
+thead { font-weight: bold; }
+
+table, tr, td { border: 1px solid lightgray; }
+
+tr, td { padding: 0 10px; }
+
 /* Console */
 .row { border-bottom: 1px dashed #ddd; }
 

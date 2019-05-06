@@ -218,29 +218,39 @@ class ViewRenderer {
 
     renderTable(resp : ITableResponse) {
         // move to separate function, maybe also refactor
-        let html = "<table>"; 
+        const headers = this.setHeaders(resp.rows);
+        let html = "<table>";
+        html += "<thead><tr>";
+        headers.forEach(header => {
+            html += `<td>${header}</td>`;
+        })
+        html += "</tr></thead>"
         for (var i = 0; i < resp.rows.length; i++) {
             const row = resp.rows[i];
-            html += "<tr>";
-
-            if (i == 0) {
-                html += "<tr>";
-                for (var cell in row) {
-                    let value = cell.charAt(0).toUpperCase() + cell.slice(1);
-                    html += "<td>" + value + "</td>";
-                }    
-                html += "</tr>";
-            }
-
             for (var cell in row) {
                 html += "<td>" + row[cell] + "</td>";
             }
             
-            html += "</td>";
+            html += "</tr>";
         }
-        html += "</html>";
+        html += "</table>";
 
         this.getLastRowContent().innerHTML += html;
+    }
+
+    setHeaders(rows: Array<object>) {
+        let headers = [];
+
+        rows.forEach((row, idx) => {
+            if(idx === 0) {
+                for (var cell in row) {
+                    let value = cell.charAt(0).toUpperCase() + cell.slice(1);
+                    headers.push(value);
+                }
+            }
+        });
+
+        return headers;
     }
 
     printPlain(text: string): void {
